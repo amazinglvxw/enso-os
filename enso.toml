@@ -1,0 +1,27 @@
+# Enso Configuration
+# All settings are optional. Enso works with sensible defaults.
+
+[core]
+max_memory_items = 50        # Hard cap: entries in MEMORY.md
+max_patterns = 30            # Hard cap: learned behavior patterns
+max_skills = 20              # Hard cap: skill index entries
+
+[fast_track]
+min_occurrences = 2          # Same error must occur 2+ times before distilling
+prediction_window = 20       # Rolling window for prediction accuracy calculation
+dead_man_threshold = 0.30    # 3 sessions below this → clear recent lessons
+
+[slow_track]
+pattern_threshold = 3        # Repetitions before extracting a pattern
+optimization_trigger = 5     # Weekly task frequency to suggest optimization
+suggestion_timing = "session_end"  # When to surface suggestions: "session_end" only
+
+[forgetting]
+stale_days = 30              # Days unused → mark as stale
+archive_days = 60            # Days unused → auto-archive to cold storage
+decay_scan = "session_end"   # When to run decay: "session_end"
+
+[distillation]
+model = "claude-haiku-4-5"   # Lightweight model for async lesson extraction
+max_lessons_per_session = 3  # Cap: lessons distilled per session
+max_words_per_lesson = 30    # Each lesson must be atomic and concise
