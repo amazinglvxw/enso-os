@@ -35,7 +35,7 @@ echo ""
 
 # ─── 1. Create directory structure ───
 echo -e "${YELLOW}→${NC} Creating ~/.enso/ ..."
-mkdir -p "$ENSO_DIR"/{hooks/{pre-tool-use,post-tool-use,stop,session-start},traces,lessons,memory}
+mkdir -p "$ENSO_DIR"/{hooks/{pre-tool-use,post-tool-use,stop,session-start},traces,lessons,memory,core}
 
 # ─── 2. Determine source directory ───
 # If run from the repo, use local files. Otherwise, download from GitHub.
@@ -44,29 +44,35 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/harness/hooks/post-tool-use/trace-emission.sh" ]; then
     SOURCE="local"
     HOOK_SRC="$SCRIPT_DIR/harness/hooks"
+    CORE_SRC="$SCRIPT_DIR/harness/core"
 else
     SOURCE="remote"
-    HOOK_SRC="$ENSO_DIR/.download_tmp"
-    mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,stop,session-start}
-    BASE_URL="https://raw.githubusercontent.com/enso-os/enso/main/harness/hooks"
-    echo -e "${YELLOW}→${NC} Downloading hooks from GitHub..."
-    curl -fsSL "$BASE_URL/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
-    curl -fsSL "$BASE_URL/post-tool-use/physical-verification.sh" -o "$HOOK_SRC/post-tool-use/physical-verification.sh"
-    curl -fsSL "$BASE_URL/post-tool-use/trace-emission.sh" -o "$HOOK_SRC/post-tool-use/trace-emission.sh"
-    curl -fsSL "$BASE_URL/stop/no-trace-no-truth.sh" -o "$HOOK_SRC/stop/no-trace-no-truth.sh"
-    curl -fsSL "$BASE_URL/stop/distill-lessons.sh" -o "$HOOK_SRC/stop/distill-lessons.sh"
-    curl -fsSL "$BASE_URL/session-start/load-lessons.sh" -o "$HOOK_SRC/session-start/load-lessons.sh"
+    HOOK_SRC="$ENSO_DIR/.download_tmp/hooks"
+    CORE_SRC="$ENSO_DIR/.download_tmp/core"
+    mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,stop,session-start} "$CORE_SRC"
+    BASE_URL="https://raw.githubusercontent.com/enso-os/enso/main/harness"
+    echo -e "${YELLOW}→${NC} Downloading from GitHub..."
+    curl -fsSL "$BASE_URL/core/env.sh" -o "$CORE_SRC/env.sh"
+    curl -fsSL "$BASE_URL/core/parse-hook-input.py" -o "$CORE_SRC/parse-hook-input.py"
+    curl -fsSL "$BASE_URL/hooks/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
+    curl -fsSL "$BASE_URL/hooks/post-tool-use/physical-verification.sh" -o "$HOOK_SRC/post-tool-use/physical-verification.sh"
+    curl -fsSL "$BASE_URL/hooks/post-tool-use/trace-emission.sh" -o "$HOOK_SRC/post-tool-use/trace-emission.sh"
+    curl -fsSL "$BASE_URL/hooks/stop/no-trace-no-truth.sh" -o "$HOOK_SRC/stop/no-trace-no-truth.sh"
+    curl -fsSL "$BASE_URL/hooks/stop/distill-lessons.sh" -o "$HOOK_SRC/stop/distill-lessons.sh"
+    curl -fsSL "$BASE_URL/hooks/session-start/load-lessons.sh" -o "$HOOK_SRC/session-start/load-lessons.sh"
 fi
 
-# ─── 3. Copy hooks ───
-echo -e "${YELLOW}→${NC} Installing hooks from $SOURCE..."
+# ─── 3. Copy core + hooks ───
+echo -e "${YELLOW}→${NC} Installing from $SOURCE..."
+cp "$CORE_SRC/env.sh" "$ENSO_DIR/core/"
+cp "$CORE_SRC/parse-hook-input.py" "$ENSO_DIR/core/"
 cp "$HOOK_SRC/pre-tool-use/core-readonly.sh" "$ENSO_DIR/hooks/pre-tool-use/"
 cp "$HOOK_SRC/post-tool-use/physical-verification.sh" "$ENSO_DIR/hooks/post-tool-use/"
 cp "$HOOK_SRC/post-tool-use/trace-emission.sh" "$ENSO_DIR/hooks/post-tool-use/"
 cp "$HOOK_SRC/stop/no-trace-no-truth.sh" "$ENSO_DIR/hooks/stop/"
 cp "$HOOK_SRC/stop/distill-lessons.sh" "$ENSO_DIR/hooks/stop/"
 cp "$HOOK_SRC/session-start/load-lessons.sh" "$ENSO_DIR/hooks/session-start/"
-chmod +x "$ENSO_DIR/hooks"/{pre-tool-use,post-tool-use,stop,session-start}/*.sh
+chmod +x "$ENSO_DIR/hooks"/{pre-tool-use,post-tool-use,stop,session-start}/*.sh "$ENSO_DIR/core/env.sh"
 
 # Clean up download temp
 [ "$SOURCE" = "remote" ] && rm -rf "$ENSO_DIR/.download_tmp"
@@ -114,6 +120,14 @@ enso_hooks = {
             "hooks": [
                 {"type": "command", "command": f"bash {enso_dir}/hooks/stop/no-trace-no-truth.sh"},
                 {"type": "command", "command": f"bash {enso_dir}/hooks/stop/distill-lessons.sh"}
+            ]
+        }
+    ],
+    "SessionStart": [
+        {
+            "matcher": "",
+            "hooks": [
+                {"type": "command", "command": f"bash {enso_dir}/hooks/session-start/load-lessons.sh"}
             ]
         }
     ]
