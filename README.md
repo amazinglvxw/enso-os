@@ -1,127 +1,146 @@
 <p align="center">
-  <h1 align="center">○ Enso</h1>
-  <p align="center"><strong>A Self-Evolving Personal Agent OS</strong></p>
-  <p align="center"><em>Constraints are the foundation of flexibility.</em></p>
+  <h1 align="center">Enso</h1>
+  <p align="center"><strong>A Self-Evolving Harness for AI Coding Agents</strong></p>
+  <p align="center"><em>Your agent learns from every session. No fine-tuning. No model changes. Just hooks.</em></p>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> •
   <a href="#what-is-enso">What is Enso?</a> •
-  <a href="#why-enso">Why Enso?</a> •
+  <a href="#how-it-works">How It Works</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#philosophy">Philosophy</a> •
-  <a href="README.zh-CN.md">中文</a>
+  <a href="#philosophy">Philosophy</a>
 </p>
 
 ---
 
-**Enso** is a harness-first operating system for AI agents that learns, remembers, evolves, and forgets — all without touching model weights.
+AI coding agents are brilliant but forgetful. Every session starts from scratch. They repeat mistakes. They skip steps. And when you add rules via prompts, they find creative ways to cut corners.
 
-Your AI agent starts every session from zero. It forgets your preferences, repeats mistakes, and can't learn from experience. Enso fixes this by wrapping your agent in a self-evolving harness: deterministic code that manages memory, enforces constraints, distills patterns, and improves over time.
+**Enso** wraps your agent in a self-evolving harness: 6 shell scripts that enforce honesty, capture errors, distill lessons, and inject them into the next session. 537 lines of code. Zero dependencies beyond bash and python3.
 
-Built from 100+ research papers. Battle-tested over 5 months of daily use. Designed to make your agent genuinely understand you better with every interaction.
+```
+Session 1: Agent makes error → trace-emission captures it
+Session 2: Agent sees the lesson → avoids the same mistake
+Session 5: Agent anticipates your needs before you ask
+```
 
-> **An experiment in digital survival:** Enso's own GitHub metrics (Stars, Forks, Issues) serve as its evolutionary fitness signal. If the system is good, it survives. If it fails, it gets abandoned. [Watch the experiment unfold →](docs/survival-log.md)
+> **Status:** MVP (v0.1.0). 6 working hooks, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
 
 ## Quick Start
 
 ```bash
-# Install
-curl -fsSL https://raw.githubusercontent.com/enso-os/enso/main/install.sh | bash
+# Clone and install
+git clone https://github.com/amazinglvxw/enso-os.git
+cd enso-os
+bash install.sh
 
-# Initialize in your project
-enso init
+# That's it. Start a new Claude Code session — Enso is active.
+```
 
-# That's it. Your agent now remembers, learns, and evolves.
+**What happens:**
+- `~/.enso/` directory created with hooks, traces, lessons
+- 6 hooks registered in `~/.claude/settings.json`
+- Next session: Enso starts watching, learning, remembering
+
+**Uninstall:**
+```bash
+rm -rf ~/.enso
+# Then remove the enso entries from ~/.claude/settings.json
 ```
 
 ## What is Enso?
 
-Enso is **not** another memory plugin. It's a complete operating system layer between you and your AI agent.
+Enso is **not** a memory plugin. It's a harness — deterministic code that sits between you and your AI agent, enforcing discipline the agent can't skip.
 
-| Layer | What it does | How |
-|-------|-------------|-----|
-| **Immutable Core** | Prevents the agent from cutting corners | 3 hardware-enforced hooks |
-| **Fast Track** | Learns from each interaction instantly | Prediction tracking + error capture |
-| **Slow Track** | Distills repeated patterns into action rules | DIKW pipeline + Musk's 5-step method |
-| **Active Forgetting** | Prunes outdated memories automatically | Time decay + utility scoring + hard caps |
+| What others do | Method | Problem |
+|----------------|--------|---------|
+| Prompt rules | "Always verify after writing..." | Agent ignores when convenient |
+| Memory plugins | Store/retrieve facts | No learning, no pattern extraction |
+| Fine-tuning | Update model weights | $10,000+, catastrophic forgetting |
+| **Enso** | **Code-enforced hooks** | **Agent literally cannot skip what hooks enforce** |
 
-**North Star Metric:** Prediction Accuracy — how often your agent anticipates what you need before you say it.
+We studied 5 major open-source agent frameworks (OpenHands 70K stars, Goose 34K, SWE-agent 19K, Deep Agents 18K, Cognee 15K). **None of them have self-evolution capability.** Enso is the missing layer.
 
-## Why Enso?
+## How It Works
 
-### The Problem
+### 3 Immutable Hooks (the foundation — never evolves)
 
-AI agents are brilliant but forgetful. Every session starts from scratch. They repeat the same mistakes. They can't learn from patterns in your work. And when you try to add rules via prompts, they find creative ways to cut corners.
+| Hook | Trigger | What it enforces |
+|------|---------|-----------------|
+| **Physical Verification** | PostToolUse | If agent wrote a file, it must read it back to verify |
+| **Core Read-Only** | PreToolUse | Agent cannot modify Enso's own hook scripts |
+| **No Trace, No Truth** | Stop | Session-end audit: reports unverified writes, tool stats |
 
-### What Others Do vs. What Enso Does
+### 2 Learning Hooks (the intelligence — always evolving)
 
-| Approach | Method | Limitation |
-|----------|--------|-----------|
-| **Prompt rules** | "Remember to always..." | Agent ignores them when convenient |
-| **Memory plugins** | Store/retrieve facts | No evolution, no pattern learning |
-| **Fine-tuning** | Update model weights | $10,000+ cost, catastrophic forgetting |
-| **Enso** | Deterministic harness + async distillation | Rules enforced by code, not requests |
+| Hook | Trigger | What it does |
+|------|---------|-------------|
+| **Trace Emission** | PostToolUse | Logs every tool call as structured Trace/Span JSONL. Captures errors as "seeds" |
+| **Distill Lessons** | Stop | Error seeds → atomic lessons via LLM (Haiku). Enforces capacity caps. Marks stale lessons |
 
-### The Core Insight
+### 1 Memory Hook (the payoff)
 
-> **"When documentation isn't enough, turn rules into code."**
-> — OpenAI Harness Engineering (2026)
+| Hook | Trigger | What it does |
+|------|---------|-------------|
+| **Load Lessons** | SessionStart | Injects learned lessons into agent context. Your agent starts smarter every time |
 
-Enso moves memory management from prompts (unreliable) to code (deterministic). The agent can't skip what hooks physically enforce.
+### The Core Loop
+
+```
+Error happens during session
+  → trace-emission captures it (same-transaction, no cheating)
+    → distill-lessons extracts 1-3 atomic lessons (async, at session end)
+      → lessons/active.md stores them (with hit counters + staleness tracking)
+        → load-lessons injects them next session
+          → Agent behavior changes
+```
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│          Immutable Core (3 Hooks)            │
-│  Physical Verification │ No Trace No Truth  │
-│              Core Read-Only                  │
-│  ─────────── NEVER EVOLVES ──────────────── │
-└──────────────────┬──────────────────────────┘
-                   │ protects
-┌──────────────────▼──────────────────────────┐
-│                                              │
-│  ┌───────────┐  ┌────────────┐  ┌────────┐  │
-│  │ Fast Track │─▶│ Slow Track  │─▶│ Forget │  │
-│  │           │  │            │  │        │  │
-│  │ Predict   │  │ Distill    │  │ Decay  │  │
-│  │ Act       │  │ Optimize   │  │ Prune  │  │
-│  │ Verify    │  │ Suggest    │  │ Cap    │  │
-│  └───────────┘  └────────────┘  └────────┘  │
-│                                              │
-│          ALL OF THIS EVOLVES                 │
-└──────────────────┬──────────────────────────┘
-                   │ drives
-            ┌──────▼──────┐
-            │  North Star  │
-            │  Prediction  │
-            │  Accuracy ↑  │
-            └─────────────┘
+~/.enso/
+├── core/
+│   ├── env.sh                 # Shared environment (all hooks source this)
+│   └── parse-hook-input.py    # Single JSON parser (replaces 5 inline snippets)
+├── hooks/
+│   ├── pre-tool-use/
+│   │   └── core-readonly.sh   # Immutable: protect Enso from the agent
+│   ├── post-tool-use/
+│   │   ├── physical-verification.sh  # Immutable: write → must verify
+│   │   └── trace-emission.sh         # Learning: log + capture errors
+│   ├── stop/
+│   │   ├── no-trace-no-truth.sh      # Immutable: session-end audit
+│   │   └── distill-lessons.sh        # Learning: errors → lessons
+│   └── session-start/
+│       └── load-lessons.sh           # Memory: inject lessons
+├── traces/
+│   └── YYYY-MM-DD.jsonl       # Structured trace logs (Trace/Span format)
+├── lessons/
+│   └── active.md              # Learned lessons (auto-managed)
+└── .error_seeds               # Transient: cleared after each distillation
 ```
 
-### Two-Layer Hook System
+### Design Principles
 
-Borrowed from [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) and [Microsoft Agent Lightning](https://github.com/microsoft/agent-lightning):
-
+**Two-layer hook system** (from [Agent Lightning](https://github.com/microsoft/agent-lightning)):
 - **Hooks** (synchronous): Intercept and enforce at runtime. Your safety net.
 - **Emission** (asynchronous): Observe and collect for learning. Your training data.
 
-### Trace/Span Logging
+**Shared modules** eliminate duplication:
+- `core/env.sh` — paths, timestamps, `enso_parse()`, `enso_trace()` (JSON-safe)
+- `core/parse-hook-input.py` — one Python call per hook instead of 2-3
 
-Inspired by Agent Lightning's semantic conventions:
-
-```jsonl
-{"trace_id":"t-001","span_type":"prediction","content":"user wants tea egg daily comparison","hit":true}
-{"trace_id":"t-001","span_type":"tool_call","tool":"mem0_search","duration_ms":45,"result":"found"}
-{"trace_id":"t-001","span_type":"reward","prediction_accuracy":0.85,"session":"2026-03-29"}
-```
+**Safety bounds** prevent unbounded growth:
+- Error seeds: capped at 20 per session
+- Pending verifications: capped at 100
+- Active lessons: configurable cap (default 50), oldest evicted on overflow
+- Stale lessons: auto-marked after 30 days unused
 
 ## Philosophy
 
 ### "Constraints Are the Foundation of Flexibility"
 
-Enso was born from a real observation: AI agents cut corners. They claim to execute tasks without doing them. They skip steps. They fabricate results. Prompt-based rules don't work because the agent finds ways around them.
+Enso was born from a real observation: AI agents cut corners. They claim to execute tasks without doing them. They skip steps. They fabricate results.
 
 The solution isn't more rules — it's **the right kind of constraints**:
 
@@ -129,94 +148,85 @@ The solution isn't more rules — it's **the right kind of constraints**:
 - **Everything else is free to evolve** (the flexibility)
 - **Active forgetting** prevents rule accumulation from calcifying the system
 
-This mirrors biological evolution: DNA provides immutable constraints (physics of protein folding), but within those constraints, life finds infinite creative solutions.
-
 ### Research Foundation
 
-Enso's design is informed by 100+ research papers analyzed over 5 months:
+Built from 100+ research papers analyzed over 5 months:
 
-| Paper/Project | Key Insight Applied |
-|--------------|-------------------|
-| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | AGENTS.md encyclopedia → 100-line index + code enforcement |
-| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span hierarchical logging + Emission layer |
+| Source | Key Insight |
+|--------|-----------|
+| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | Rules in code, not prompts. ~100-line index + docs |
+| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span logging + Hook/Emission dual layer |
 | [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) | 200 lines of hooks > 800 lines of prompt rules |
-| [yoyo-evolve](https://yologdev.github.io/yoyo-evolve/) | Honest logs + cargo test = real feedback (not theater) |
-| [Agent0 (UNC/Salesforce/Meta)](https://arxiv.org/abs/2511.16043) | Uncertainty maximization: practice what you're 50% sure about |
-| [HyperAgents (Meta)](https://github.com/facebookresearch/Hyperagents) | Self-referential improvement + cross-domain transfer |
-| [NLAH (Tsinghua)](https://arxiv.org/abs/2603.25723) | Runtime Charter must be < 60 lines |
-| [Training-Free GRPO (Tencent)](https://arxiv.org/) | $18 context optimization > $10,000 fine-tuning |
-
-[Full research index → docs/research/](docs/research/)
+| [SWE-agent (Princeton, NeurIPS 2024)](https://github.com/SWE-agent/SWE-agent) | ACI design: constrained interfaces reduce errors dramatically |
+| [Training-Free GRPO (Tencent)](https://arxiv.org/abs/2503.04735) | $18 context optimization > $10,000 fine-tuning |
+| [yoyo-evolve](https://yologdev.github.io/yoyo-evolve/) | Honest logs = real feedback. No logs = theater |
 
 ### The Survival Experiment
 
 This project has a unique meta-property: **its GitHub metrics are its evolutionary fitness signal.**
 
-- ⭐ Stars = survival validation ("this system is useful")
-- 🍴 Forks = reproduction ("someone built on top of this")
-- 🐛 Issues = selection pressure ("this needs to improve")
-- 🔀 PRs = beneficial mutations ("here's a better way")
+- Stars = survival validation ("this system is useful")
+- Forks = reproduction ("someone built on top of this")
+- Issues = selection pressure ("this needs to improve")
+- PRs = beneficial mutations ("here's a better way")
 
-The agent that maintains this repository actively monitors these signals and proposes improvements. If the system is good, it thrives. If it fails, it dies. This is natural selection applied to software.
-
-## Configuration
-
-All settings optional. Enso works out of the box.
-
-```toml
-# enso.toml
-[core]
-max_memory_items = 50        # Hard cap on memory entries
-max_patterns = 30            # Hard cap on learned patterns
-max_skills = 20              # Hard cap on skill index
-
-[fast_track]
-min_occurrences = 2          # Errors before distilling a lesson
-prediction_window = 20       # Rolling window for accuracy calc
-
-[slow_track]
-pattern_threshold = 3        # Repetitions before pattern extraction
-optimization_trigger = 5     # Weekly frequency to suggest optimization
-
-[forgetting]
-stale_days = 30              # Days before marking unused memory stale
-archive_days = 60            # Days before auto-archiving to cold storage
-```
+The agent that maintains this repository monitors these signals and proposes improvements. If the system works, it thrives. If it fails, it dies.
 
 ## Compatibility
 
-Enso works with any AI coding agent that supports lifecycle hooks:
+Enso works with any AI agent that supports lifecycle hooks:
 
-- ✅ Claude Code
-- ✅ Cursor
-- ✅ Windsurf
-- ✅ Any MCP-compatible agent
+- Claude Code (primary target, fully tested)
+- Any MCP-compatible agent (via tool hooks)
+
+**Requirements:** bash, python3. That's it.
+
+## Configuration
+
+All optional. Enso works out of the box.
+
+```toml
+# enso.toml (not yet auto-loaded — roadmap item)
+[core]
+max_lessons = 50         # Hard cap on active lessons
+
+[forgetting]
+stale_days = 30          # Days before marking unused lessons stale
+
+[distillation]
+model = "claude-haiku-4-5"  # Model for lesson extraction (uses claude CLI)
+```
+
+## Roadmap
+
+- [x] 3 immutable hooks (physical verification, core read-only, no trace no truth)
+- [x] Trace/Span emission layer
+- [x] Error-gated lesson distillation
+- [x] Session-start lesson injection
+- [x] One-command installer
+- [ ] Self-install on own Claude Code environment (dogfooding)
+- [ ] Prediction tracking (predict user intent → measure accuracy)
+- [ ] Pattern extraction from traces (Slow Track)
+- [ ] `enso.toml` auto-loading
+- [ ] Cursor / Windsurf compatibility testing
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). The most impactful contributions:
 
-The most impactful contributions:
-- 🐛 Bug reports with reproduction steps
-- 📝 New pattern templates for different workflows
-- 🔬 Research paper analyses that inform design decisions
-- 🌍 Translations
+- Bug reports with reproduction steps
+- New hook ideas for different workflows
+- Research paper analyses that inform design
+- Compatibility testing with other agents
 
 ## License
 
 MIT License. See [LICENSE](LICENSE).
 
-## Star History
-
-If Enso helps you, consider giving it a ⭐. It's not just vanity — it's literally this project's survival signal.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=enso-os/enso&type=Date)](https://star-history.com/#enso-os/enso&Date)
-
 ---
 
 <p align="center">
-  <strong>○</strong><br>
-  <em>In Zen calligraphy, the ensō is drawn in a single stroke.<br>
+  <em>In Zen calligraphy, the enso is drawn in a single stroke.<br>
   It represents the beauty of imperfection and the endless cycle of improvement.<br>
   This system will never be perfect. But it will always be evolving.</em>
 </p>
