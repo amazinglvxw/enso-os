@@ -15,7 +15,7 @@ case "$TOOL_NAME" in Write|Edit) ;; *) exit 0 ;; esac
 
 BUDGET=6000
 if [ -f "$FILE_PATH" ]; then
-    CURRENT=$(wc -c < "$FILE_PATH" | tr -d ' ')
+    CURRENT=$(wc -m < "$FILE_PATH" | tr -d ' ')
     if [ "$CURRENT" -gt "$BUDGET" ]; then
         echo "ENSO MEMORY BUDGET: MEMORY.md is ${CURRENT}/${BUDGET} chars. Consolidate before adding." >&2
         exit 2

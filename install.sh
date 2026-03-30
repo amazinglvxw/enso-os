@@ -55,10 +55,13 @@ else
     curl -fsSL "$BASE_URL/core/env.sh" -o "$CORE_SRC/env.sh"
     curl -fsSL "$BASE_URL/core/parse-hook-input.py" -o "$CORE_SRC/parse-hook-input.py"
     curl -fsSL "$BASE_URL/hooks/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
+    curl -fsSL "$BASE_URL/hooks/pre-tool-use/memory-budget-guard.sh" -o "$HOOK_SRC/pre-tool-use/memory-budget-guard.sh"
+    curl -fsSL "$BASE_URL/hooks/pre-tool-use/memory-safety-scan.sh" -o "$HOOK_SRC/pre-tool-use/memory-safety-scan.sh"
     curl -fsSL "$BASE_URL/hooks/post-tool-use/physical-verification.sh" -o "$HOOK_SRC/post-tool-use/physical-verification.sh"
     curl -fsSL "$BASE_URL/hooks/post-tool-use/trace-emission.sh" -o "$HOOK_SRC/post-tool-use/trace-emission.sh"
     curl -fsSL "$BASE_URL/hooks/stop/no-trace-no-truth.sh" -o "$HOOK_SRC/stop/no-trace-no-truth.sh"
     curl -fsSL "$BASE_URL/hooks/stop/distill-lessons.sh" -o "$HOOK_SRC/stop/distill-lessons.sh"
+    curl -fsSL "$BASE_URL/hooks/stop/session-end-maintenance.sh" -o "$HOOK_SRC/stop/session-end-maintenance.sh"
     curl -fsSL "$BASE_URL/hooks/session-start/load-lessons.sh" -o "$HOOK_SRC/session-start/load-lessons.sh"
 fi
 
@@ -66,11 +69,10 @@ fi
 echo -e "${YELLOW}→${NC} Installing from $SOURCE..."
 cp "$CORE_SRC/env.sh" "$ENSO_DIR/core/"
 cp "$CORE_SRC/parse-hook-input.py" "$ENSO_DIR/core/"
-cp "$HOOK_SRC/pre-tool-use/core-readonly.sh" "$ENSO_DIR/hooks/pre-tool-use/"
+cp "$HOOK_SRC/pre-tool-use/"*.sh "$ENSO_DIR/hooks/pre-tool-use/"
 cp "$HOOK_SRC/post-tool-use/physical-verification.sh" "$ENSO_DIR/hooks/post-tool-use/"
 cp "$HOOK_SRC/post-tool-use/trace-emission.sh" "$ENSO_DIR/hooks/post-tool-use/"
-cp "$HOOK_SRC/stop/no-trace-no-truth.sh" "$ENSO_DIR/hooks/stop/"
-cp "$HOOK_SRC/stop/distill-lessons.sh" "$ENSO_DIR/hooks/stop/"
+cp "$HOOK_SRC/stop/"*.sh "$ENSO_DIR/hooks/stop/"
 cp "$HOOK_SRC/session-start/load-lessons.sh" "$ENSO_DIR/hooks/session-start/"
 chmod +x "$ENSO_DIR/hooks"/{pre-tool-use,post-tool-use,stop,session-start}/*.sh "$ENSO_DIR/core/env.sh"
 
@@ -102,7 +104,11 @@ enso_hooks = {
     "PreToolUse": [
         {
             "matcher": "Write|Edit",
-            "hooks": [{"type": "command", "command": f"bash {enso_dir}/hooks/pre-tool-use/core-readonly.sh"}]
+            "hooks": [
+                {"type": "command", "command": f"bash {enso_dir}/hooks/pre-tool-use/core-readonly.sh"},
+                {"type": "command", "command": f"bash {enso_dir}/hooks/pre-tool-use/memory-budget-guard.sh"},
+                {"type": "command", "command": f"bash {enso_dir}/hooks/pre-tool-use/memory-safety-scan.sh"}
+            ]
         }
     ],
     "PostToolUse": [
@@ -119,7 +125,8 @@ enso_hooks = {
             "matcher": "",
             "hooks": [
                 {"type": "command", "command": f"bash {enso_dir}/hooks/stop/no-trace-no-truth.sh"},
-                {"type": "command", "command": f"bash {enso_dir}/hooks/stop/distill-lessons.sh"}
+                {"type": "command", "command": f"bash {enso_dir}/hooks/stop/distill-lessons.sh"},
+                {"type": "command", "command": f"bash {enso_dir}/hooks/stop/session-end-maintenance.sh"}
             ]
         }
     ],

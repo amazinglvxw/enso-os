@@ -37,3 +37,17 @@ print(json.dumps({k: v for k, v in zip(sys.argv[1::2], sys.argv[2::2])}))
 " "$@" 2>/dev/null) || return 0
     echo "$json_str" >> "$ENSO_TRACE_FILE"
 }
+
+# Shared: enforce lessons capacity cap (evict oldest on overflow)
+enso_enforce_lesson_cap() {
+    local max="${1:-50}"
+    [ -f "$ENSO_LESSONS_FILE" ] || return 0
+    local total
+    total=$(grep -c "^- " "$ENSO_LESSONS_FILE" 2>/dev/null || echo "0")
+    if [ "$total" -gt "$max" ]; then
+        local overflow=$((total - max))
+        echo "🗑️  [enso] Lessons: $total/$max, evicting $overflow oldest" >&2
+        { head -3 "$ENSO_LESSONS_FILE"; grep "^- " "$ENSO_LESSONS_FILE" | tail -"$max"; } > "$ENSO_LESSONS_FILE.tmp"
+        mv "$ENSO_LESSONS_FILE.tmp" "$ENSO_LESSONS_FILE"
+    fi
+}
