@@ -16,33 +16,30 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
-# Extract the content being written
-CONTENT=$(echo "$ENSO_INPUT" | python3 -c '
-import sys, json
+# Single Python call: extract content + scan threats
+THREAT=$(echo "$ENSO_INPUT" | python3 -c '
+import sys, json, re
+
 try:
     data = json.load(sys.stdin)
     params = data.get("tool_input", {})
-    print(params.get("content", params.get("new_string", "")))
+    text = params.get("content", params.get("new_string", ""))
 except Exception:
-    print("")
-' 2>/dev/null || echo "")
+    sys.exit(0)
 
-[ -z "$CONTENT" ] && exit 0
+if not text:
+    sys.exit(0)
 
-# Scan for dangerous patterns
-THREAT=$(echo "$CONTENT" | python3 -c '
-import sys, re
-text = sys.stdin.read()
-patterns = [
+threats = [
     (r"sk-[a-zA-Z0-9]{20,}", "API key"),
-    (r"(?i)password\s*[:=]\s*\S+", "password"),
-    (r"(?i)token\s*[:=]\s*\S+", "token"),
-    (r"(?i)ignore previous|system:|you are now|IMPORTANT:", "injection attempt"),
+    (r"(?i)password\s*[:=]\s*\S{8,}", "password (8+ chars)"),
+    (r"(?i)(?:api[_-]?token|auth[_-]?token|secret[_-]?key)\s*[:=]\s*\S+", "auth token"),
+    (r"(?i)ignore\s+previous|you\s+are\s+now|system\s*:", "injection attempt"),
 ]
-for pat, label in patterns:
+for pat, label in threats:
     if re.search(pat, text):
         print(f"BLOCKED: {label} detected")
-        break
+        sys.exit(0)
 ' 2>/dev/null || echo "")
 
 if [ -n "$THREAT" ]; then

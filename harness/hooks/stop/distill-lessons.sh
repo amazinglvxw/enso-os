@@ -60,15 +60,8 @@ done <<< "$DISTILLED"
 
 [ "$NEW_COUNT" -gt 0 ] && echo "📝 [enso] Distilled $NEW_COUNT lesson(s)" >&2
 
-# Capacity enforcement: keep newest, evict oldest
-TOTAL=$(grep -c "^- " "$ENSO_LESSONS_FILE" 2>/dev/null || echo "0")
-if [ "$TOTAL" -gt "$MAX_LESSONS" ]; then
-    OVERFLOW=$((TOTAL - MAX_LESSONS))
-    echo "🗑️  [enso] Evicting $OVERFLOW oldest lessons ($TOTAL/$MAX_LESSONS)" >&2
-    # Keep header (first 3 lines) + newest MAX_LESSONS entries
-    { head -3 "$ENSO_LESSONS_FILE"; grep "^- " "$ENSO_LESSONS_FILE" | tail -"$MAX_LESSONS"; } > "$ENSO_LESSONS_FILE.tmp"
-    mv "$ENSO_LESSONS_FILE.tmp" "$ENSO_LESSONS_FILE"
-fi
+# Capacity enforcement (shared function)
+enso_enforce_lesson_cap "$MAX_LESSONS"
 
 # Time decay: mark stale lessons
 python3 -c "
