@@ -9,14 +9,15 @@
   <a href="#what-is-enso">What is Enso?</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#philosophy">Philosophy</a>
+  <a href="#philosophy">Philosophy</a> •
+  <a href="README.zh-CN.md">中文</a>
 </p>
 
 ---
 
 AI coding agents are brilliant but forgetful. Every session starts from scratch. They repeat mistakes. They skip steps. And when you add rules via prompts, they find creative ways to cut corners.
 
-**Enso** wraps your agent in a self-evolving harness: 6 shell scripts that enforce honesty, capture errors, distill lessons, and inject them into the next session. 537 lines of code. Zero dependencies beyond bash and python3.
+**Enso** wraps your agent in a self-evolving harness: 9 shell scripts that enforce honesty, capture errors, distill lessons, and inject them into the next session. 658 lines of code. Zero dependencies beyond bash and python3.
 
 ```
 Session 1: Agent makes error → trace-emission captures it
@@ -24,7 +25,7 @@ Session 2: Agent sees the lesson → avoids the same mistake
 Session 5: Agent anticipates your needs before you ask
 ```
 
-> **Status:** MVP (v0.1.0). 6 working hooks, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
+> **Status:** MVP (v0.1.0). 9 working hooks, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
 
 ## Quick Start
 
@@ -39,7 +40,7 @@ bash install.sh
 
 **What happens:**
 - `~/.enso/` directory created with hooks, traces, lessons
-- 6 hooks registered in `~/.claude/settings.json`
+- 9 hooks registered in `~/.claude/settings.json`
 - Next session: Enso starts watching, learning, remembering
 
 **Uninstall:**
@@ -204,7 +205,7 @@ model = "claude-haiku-4-5"  # Model for lesson extraction (uses claude CLI)
 - [x] Error-gated lesson distillation
 - [x] Session-start lesson injection
 - [x] One-command installer
-- [ ] Self-install on own Claude Code environment (dogfooding)
+- [x] Self-install on own Claude Code environment (dogfooding)
 - [ ] Prediction tracking (predict user intent → measure accuracy)
 - [ ] Pattern extraction from traces (Slow Track)
 - [ ] `enso.toml` auto-loading
