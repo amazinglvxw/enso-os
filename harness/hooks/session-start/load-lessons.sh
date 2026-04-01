@@ -28,3 +28,48 @@ if [ "$LESSON_COUNT" -gt 0 ]; then
 else
     echo "OK: Enso ready ($SESSION_COUNT sessions, no lessons yet)"
 fi
+
+
+# ─── DIKW: Load Knowledge layer ───
+if [ -f "${ENSO_KNOWLEDGE_FILE:-}" ]; then
+    K_RULES=$(python3 -c "
+import json, os
+kf = os.environ.get('ENSO_KNOWLEDGE_FILE','')
+if os.path.exists(kf):
+    for e in json.load(open(kf)):
+        if e.get('status','active') == 'active':
+            print(f\"- [{e['category']}] {e['rule']}\")
+" 2>/dev/null || true)
+    K_COUNT=0
+    [ -n "$K_RULES" ] && K_COUNT=$(echo "$K_RULES" | grep -c "^- " 2>/dev/null || echo "0")
+    [ "$K_COUNT" -gt 0 ] && printf '\n<enso-knowledge count="%s">\n%s\n</enso-knowledge>\n' "$K_COUNT" "$K_RULES"
+fi
+
+# ─── DIKW: Load Wisdom layer ───
+if [ -f "${ENSO_WISDOM_FILE:-}" ]; then
+    W_RULES=$(python3 -c "
+import json, os
+wf = os.environ.get('ENSO_WISDOM_FILE','')
+if os.path.exists(wf):
+    for e in json.load(open(wf)):
+        print(f\"- [VERIFIED] {e['rule']}\")
+" 2>/dev/null || true)
+    W_COUNT=0
+    [ -n "$W_RULES" ] && W_COUNT=$(echo "$W_RULES" | grep -c "^- " 2>/dev/null || echo "0")
+    [ "$W_COUNT" -gt 0 ] && printf '\n<enso-wisdom count="%s">\n%s\n</enso-wisdom>\n' "$W_COUNT" "$W_RULES"
+fi
+
+# ─── DIKW: Record loaded IDs for utility tracking ───
+python3 -c "
+import json, os
+info = os.environ.get('ENSO_INFO_FILE','')
+if os.path.exists(info):
+    ids = []
+    with open(info) as f:
+        for line in f:
+            try:
+                e = json.loads(line)
+                if e.get('status') == 'active': ids.append(e['id'])
+            except: pass
+    with open(os.environ.get('ENSO_SESSION_LOADED_IDS', '/tmp/enso-session-loaded-ids'),'w') as f: f.write(','.join(ids))
+" 2>/dev/null || true
