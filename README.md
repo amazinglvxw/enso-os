@@ -17,15 +17,16 @@
 
 AI coding agents are brilliant but forgetful. Every session starts from scratch. They repeat mistakes. They skip steps. And when you add rules via prompts, they find creative ways to cut corners.
 
-**Enso** wraps your agent in a self-evolving harness: 9 shell scripts that enforce honesty, capture errors, distill lessons, and inject them into the next session. 658 lines of code. Zero dependencies beyond bash and python3.
+**Enso** wraps your agent in a self-evolving harness: 10 shell scripts + 1 DIKW utility that enforce honesty, capture errors, distill lessons, consolidate knowledge, and inject them into the next session. 952 lines of code. Zero dependencies beyond bash and python3.
 
 ```
 Session 1: Agent makes error → trace-emission captures it
 Session 2: Agent sees the lesson → avoids the same mistake
-Session 5: Agent anticipates your needs before you ask
+Session 10: Lessons consolidate into Knowledge rules
+Session 30: Verified Knowledge promotes to Wisdom (permanent)
 ```
 
-> **Status:** MVP (v0.1.0). 9 working hooks, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
+> **Status:** v0.2.0. 10 hooks + DIKW distillation pipeline, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
 
 ## Quick Start
 
@@ -39,8 +40,8 @@ bash install.sh
 ```
 
 **What happens:**
-- `~/.enso/` directory created with hooks, traces, lessons
-- 9 hooks registered in `~/.claude/settings.json`
+- `~/.enso/` directory created with hooks, traces, lessons, DIKW layers
+- 10 hooks registered in `~/.claude/settings.json`
 - Next session: Enso starts watching, learning, remembering
 
 **Uninstall:**
@@ -72,28 +73,41 @@ We studied 5 major open-source agent frameworks (OpenHands 70K stars, Goose 34K,
 | **Core Read-Only** | PreToolUse | Agent cannot modify Enso's own hook scripts |
 | **No Trace, No Truth** | Stop | Session-end audit: reports unverified writes, tool stats |
 
-### 2 Learning Hooks (the intelligence — always evolving)
+### 3 Learning Hooks (the intelligence — always evolving)
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| **Trace Emission** | PostToolUse | Logs every tool call as structured Trace/Span JSONL. Captures errors as "seeds" |
-| **Distill Lessons** | Stop | Error seeds → atomic lessons via LLM (Haiku). Enforces capacity caps. Marks stale lessons |
+| **Trace Emission** | PostToolUse | Logs every successful tool call as structured Trace/Span JSONL |
+| **Error Seed Capture** | PostToolUseFailure | Captures failed tool calls as "error seeds" for distillation |
+| **Distill Lessons** | Stop | Error seeds → atomic lessons via LLM (Haiku). Dual-writes to DIKW I-layer. Tracks utility per lesson |
 
 ### 1 Memory Hook (the payoff)
 
 | Hook | Trigger | What it does |
 |------|---------|-------------|
-| **Load Lessons** | SessionStart | Injects learned lessons into agent context. Your agent starts smarter every time |
+| **Load Lessons** | SessionStart | Injects lessons + Knowledge rules + Wisdom into agent context. Loads all 3 DIKW layers |
 
-### The Core Loop
+### 3 Guardian Hooks (safety)
+
+| Hook | Trigger | What it does |
+|------|---------|-------------|
+| **Memory Budget Guard** | PreToolUse | Blocks MEMORY.md writes exceeding 6000 chars |
+| **Memory Safety Scan** | PreToolUse | Detects API keys, passwords, injection attempts |
+| **Session-End Maintenance** | Stop | Capacity checks + staleness marking + budget warnings |
+
+### The DIKW Distillation Loop
 
 ```
 Error happens during session
-  → trace-emission captures it (same-transaction, no cheating)
-    → distill-lessons extracts 1-3 atomic lessons (async, at session end)
-      → lessons/active.md stores them (with hit counters + staleness tracking)
-        → load-lessons injects them next session
+  → error-seed-capture logs it (same-transaction, no cheating)
+    → distill-lessons extracts atomic lessons + categories (async, session end)
+      → I-layer: info-layer.jsonl (structured, with hit counters + utility tracking)
+        → load-lessons injects lessons + knowledge + wisdom next session
           → Agent behavior changes
+
+  [Async, daily]  K-layer: ≥3 similar I-entries → merged into 1 Knowledge rule
+  [Async, weekly] W-layer: Knowledge with ≥30% error reduction → promoted to Wisdom
+  [Continuous]    Stale lessons pruned after 60 days or 5 consecutive misses
 ```
 
 ## Architecture
@@ -102,18 +116,28 @@ Error happens during session
 ~/.enso/
 ├── core/
 │   ├── env.sh                 # Shared environment (all hooks source this)
-│   └── parse-hook-input.py    # Single JSON parser (replaces 5 inline snippets)
+│   ├── parse-hook-input.py    # Single JSON parser (replaces 5 inline snippets)
+│   └── dikw-utils.py          # DIKW utilities: 7 CLI subcommands (pure stdlib)
 ├── hooks/
 │   ├── pre-tool-use/
-│   │   └── core-readonly.sh   # Immutable: protect Enso from the agent
+│   │   ├── core-readonly.sh          # Immutable: protect Enso from the agent
+│   │   ├── memory-budget-guard.sh    # Guardian: cap MEMORY.md at 6000 chars
+│   │   └── memory-safety-scan.sh     # Guardian: block secrets & injection
 │   ├── post-tool-use/
 │   │   ├── physical-verification.sh  # Immutable: write → must verify
-│   │   └── trace-emission.sh         # Learning: log + capture errors
+│   │   └── trace-emission.sh         # Learning: log successful tool calls
+│   ├── post-tool-use-failure/
+│   │   └── error-seed-capture.sh     # Learning: capture failed calls as seeds
 │   ├── stop/
 │   │   ├── no-trace-no-truth.sh      # Immutable: session-end audit
-│   │   └── distill-lessons.sh        # Learning: errors → lessons
+│   │   ├── distill-lessons.sh        # Learning: errors → lessons + DIKW I-layer
+│   │   └── session-end-maintenance.sh # Guardian: capacity + staleness checks
 │   └── session-start/
-│       └── load-lessons.sh           # Memory: inject lessons
+│       └── load-lessons.sh           # Memory: inject lessons + K/W layers
+├── dikw/
+│   ├── info-layer.jsonl       # I-layer: structured lesson entries with utility tracking
+│   ├── knowledge.json         # K-layer: merged rules (daily consolidation)
+│   └── wisdom.json            # W-layer: verified rules (weekly audit)
 ├── traces/
 │   └── YYYY-MM-DD.jsonl       # Structured trace logs (Trace/Span format)
 ├── lessons/
@@ -127,15 +151,23 @@ Error happens during session
 - **Hooks** (synchronous): Intercept and enforce at runtime. Your safety net.
 - **Emission** (asynchronous): Observe and collect for learning. Your training data.
 
+**DIKW distillation pipeline** (Data → Information → Knowledge → Wisdom):
+- **I-layer** (per-session): Raw lessons with category, hit counter, miss streak
+- **K-layer** (daily async): Similar lessons merged into knowledge rules via LLM
+- **W-layer** (weekly async): Knowledge validated by error-rate reduction → permanent wisdom
+
 **Shared modules** eliminate duplication:
-- `core/env.sh` — paths, timestamps, `enso_parse()`, `enso_trace()` (JSON-safe)
+- `core/env.sh` — paths, timestamps, `enso_parse()`, `enso_trace()`, `enso_dikw()` (JSON-safe)
 - `core/parse-hook-input.py` — one Python call per hook instead of 2-3
+- `core/dikw-utils.py` — 7 CLI subcommands for DIKW operations (pure stdlib, zero deps)
 
 **Safety bounds** prevent unbounded growth:
 - Error seeds: capped at 20 per session
 - Pending verifications: capped at 100
 - Active lessons: configurable cap (default 50), oldest evicted on overflow
-- Stale lessons: auto-marked after 30 days unused
+- Stale lessons: auto-pruned after 60 days or 5 consecutive misses
+- Knowledge entries: merged from 3+ similar I-layer entries
+- Wisdom entries: capped at 20 (most validated rules only)
 
 ## Philosophy
 
@@ -206,8 +238,10 @@ model = "claude-haiku-4-5"  # Model for lesson extraction (uses claude CLI)
 - [x] Session-start lesson injection
 - [x] One-command installer
 - [x] Self-install on own Claude Code environment (dogfooding)
+- [x] DIKW async distillation (I/K/W layers with utility tracking)
+- [x] Guardian hooks (memory budget, safety scan, session-end maintenance)
+- [x] Error seed capture split to PostToolUseFailure hook
 - [ ] Prediction tracking (predict user intent → measure accuracy)
-- [ ] Pattern extraction from traces (Slow Track)
 - [ ] `enso.toml` auto-loading
 - [ ] Cursor / Windsurf compatibility testing
 
