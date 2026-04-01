@@ -51,3 +51,17 @@ enso_enforce_lesson_cap() {
         mv "$ENSO_LESSONS_FILE.tmp" "$ENSO_LESSONS_FILE"
     fi
 }
+
+# ─── DIKW Layer paths ───
+export ENSO_DIKW_DIR="$ENSO_DIR/dikw"
+export ENSO_INFO_FILE="$ENSO_DIKW_DIR/info-layer.jsonl"
+export ENSO_KNOWLEDGE_FILE="$ENSO_DIKW_DIR/knowledge.json"
+export ENSO_WISDOM_FILE="$ENSO_DIKW_DIR/wisdom.json"
+export ENSO_DIKW_UTILS="$ENSO_CORE/dikw-utils.py"
+
+[ -d "$ENSO_DIKW_DIR" ] || mkdir -p "$ENSO_DIKW_DIR"
+export ENSO_SESSION_LOADED_IDS="${TMPDIR:-/tmp}/enso-session-loaded-ids-$$"
+
+enso_dikw() {
+    python3 "$ENSO_DIKW_UTILS" "$@"
+}
