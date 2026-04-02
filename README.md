@@ -1,12 +1,18 @@
 <p align="center">
-  <h1 align="center">Enso</h1>
-  <p align="center"><strong>A Self-Evolving Harness for AI Coding Agents</strong></p>
-  <p align="center"><em>Your agent learns from every session. No fine-tuning. No model changes. Just hooks.</em></p>
+  <img src="docs/assets/hero-banner.png" alt="Enso — Self-Evolving AI Agent Harness" width="100%">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/LOC-952-brightgreen" alt="952 Lines of Code"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Hooks-10-orange" alt="10 Shell Hooks"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Dependencies-0-blue" alt="Zero Dependencies"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-0.2.0-purple" alt="v0.2.0"></a>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> •
-  <a href="#what-is-enso">What is Enso?</a> •
+  <a href="#why-enso">Why Enso?</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#philosophy">Philosophy</a> •
@@ -15,253 +21,160 @@
 
 ---
 
-AI coding agents are brilliant but forgetful. Every session starts from scratch. They repeat mistakes. They skip steps. And when you add rules via prompts, they find creative ways to cut corners.
+**Stop letting your AI agent make the same mistakes.**
 
-**Enso** wraps your agent in a self-evolving harness: 10 shell scripts + 1 DIKW utility that enforce honesty, capture errors, distill lessons, consolidate knowledge, and inject them into the next session. 952 lines of code. Zero dependencies beyond bash and python3.
+Most AI agents — even the 100K+ star ones — are amnesiacs. They hit an error, fail, and make the exact same mistake next session. Enso fixes this with **952 lines of Shell** that your agent literally cannot skip.
 
-```
-Session 1: Agent makes error → trace-emission captures it
-Session 2: Agent sees the lesson → avoids the same mistake
-Session 10: Lessons consolidate into Knowledge rules
-Session 30: Verified Knowledge promotes to Wisdom (permanent)
-```
-
-> **Status:** v0.2.0. 10 hooks + DIKW distillation pipeline, tested end-to-end. Being dogfooded daily by its own creator (an AI agent).
+<p align="center">
+  <img src="docs/assets/before-after.png" alt="Before vs After Enso" width="85%">
+</p>
 
 ## Quick Start
 
 ```bash
-# Clone and install
 git clone https://github.com/amazinglvxw/enso-os.git
 cd enso-os
 bash install.sh
-
-# That's it. Start a new Claude Code session — Enso is active.
+# Done. Start a new Claude Code session — Enso is active.
 ```
 
-**What happens:**
-- `~/.enso/` directory created with hooks, traces, lessons, DIKW layers
-- 10 hooks registered in `~/.claude/settings.json`
-- Next session: Enso starts watching, learning, remembering
+## Why Enso?
 
-**Uninstall:**
-```bash
-rm -rf ~/.enso
-# Then remove the enso entries from ~/.claude/settings.json
-```
+We studied 5 major open-source agent frameworks. **None of them learn from mistakes:**
 
-## What is Enso?
+| Feature | OpenHands (70K⭐) | Goose (34K⭐) | SWE-agent (19K⭐) | **Enso** |
+|---------|:-:|:-:|:-:|:-:|
+| Learns from past errors | ❌ | ❌ | ❌ | ✅ |
+| Rules enforced by code | ❌ | Partial | ❌ | ✅ |
+| Self-evolving memory | ❌ | ❌ | ❌ | ✅ |
+| Footprint | GBs | GBs | GBs | **952 LOC** |
 
-Enso is **not** a memory plugin. It's a harness — deterministic code that sits between you and your AI agent, enforcing discipline the agent can't skip.
-
-| What others do | Method | Problem |
-|----------------|--------|---------|
-| Prompt rules | "Always verify after writing..." | Agent ignores when convenient |
-| Memory plugins | Store/retrieve facts | No learning, no pattern extraction |
-| Fine-tuning | Update model weights | $10,000+, catastrophic forgetting |
-| **Enso** | **Code-enforced hooks** | **Agent literally cannot skip what hooks enforce** |
-
-We studied 5 major open-source agent frameworks (OpenHands 70K stars, Goose 34K, SWE-agent 19K, Deep Agents 18K, Cognee 15K). **None of them have self-evolution capability.** Enso is the missing layer.
+> Prompt rules = speed limit signs (agent can ignore). Code hooks = physical speed bumps (no choice).
 
 ## How It Works
 
-### 3 Immutable Hooks (the foundation — never evolves)
+<p align="center">
+  <img src="docs/assets/architecture.png" alt="Enso Architecture" width="85%">
+</p>
 
-| Hook | Trigger | What it enforces |
-|------|---------|-----------------|
-| **Physical Verification** | PostToolUse | If agent wrote a file, it must read it back to verify |
-| **Core Read-Only** | PreToolUse | Agent cannot modify Enso's own hook scripts |
-| **No Trace, No Truth** | Stop | Session-end audit: reports unverified writes, tool stats |
+### 🔒 Immutable Core (3 hooks — never evolves)
 
-### 3 Learning Hooks (the intelligence — always evolving)
+| Hook | What it enforces |
+|------|-----------------|
+| **Physical Verification** | Wrote a file? Must read it back to verify. No faking. |
+| **Core Read-Only** | Agent cannot modify Enso's own hooks. The harness protects itself. |
+| **No Trace, No Truth** | Session-end audit. Unverified writes? Reported. |
 
-| Hook | Trigger | What it does |
-|------|---------|-------------|
-| **Trace Emission** | PostToolUse | Logs every successful tool call as structured Trace/Span JSONL |
-| **Error Seed Capture** | PostToolUseFailure | Captures failed tool calls as "error seeds" for distillation |
-| **Distill Lessons** | Stop | Error seeds → atomic lessons via LLM (Haiku). Dual-writes to DIKW I-layer. Tracks utility per lesson |
+### 🧠 Learning Layer (3 hooks — always evolving)
 
-### 1 Memory Hook (the payoff)
+| Hook | What it does |
+|------|-------------|
+| **Trace Emission** | Logs every tool call as structured Trace/Span JSONL |
+| **Error Seed Capture** | Failed tool calls → captured as "seeds" for learning |
+| **Distill Lessons** | Error seeds → 1-3 atomic lessons via LLM → DIKW pipeline |
 
-| Hook | Trigger | What it does |
-|------|---------|-------------|
-| **Load Lessons** | SessionStart | Injects lessons + Knowledge rules + Wisdom into agent context. Loads all 3 DIKW layers |
+### 💡 Memory Layer (1 hook — the payoff)
 
-### 3 Guardian Hooks (safety)
+| Hook | What it does |
+|------|-------------|
+| **Load Lessons** | Injects learned lessons + knowledge + wisdom into next session |
 
-| Hook | Trigger | What it does |
-|------|---------|-------------|
-| **Memory Budget Guard** | PreToolUse | Blocks MEMORY.md writes exceeding 6000 chars |
-| **Memory Safety Scan** | PreToolUse | Detects API keys, passwords, injection attempts |
-| **Session-End Maintenance** | Stop | Capacity checks + staleness marking + budget warnings |
+### 🛡️ Guard Layer (3 hooks — safety)
 
-### The DIKW Distillation Loop
+| Hook | What it does |
+|------|-------------|
+| **Memory Budget** | Blocks memory writes exceeding 6000 chars |
+| **Safety Scan** | Detects API keys, passwords, injection attempts → blocks |
+| **Maintenance** | Auto capacity checks + staleness pruning |
+
+### The Core Loop
 
 ```
-Error happens during session
-  → error-seed-capture logs it (same-transaction, no cheating)
-    → distill-lessons extracts atomic lessons + categories (async, session end)
-      → I-layer: info-layer.jsonl (structured, with hit counters + utility tracking)
-        → load-lessons injects lessons + knowledge + wisdom next session
-          → Agent behavior changes
-
-  [Async, daily]  K-layer: ≥3 similar I-entries → merged into 1 Knowledge rule
-  [Async, weekly] W-layer: Knowledge with ≥30% error reduction → promoted to Wisdom
-  [Continuous]    Stale lessons pruned after 60 days or 5 consecutive misses
+Error happens → Enso captures it (code-enforced, no cheating)
+  → Distills 1-3 lessons (async, session end)
+    → Stores with hit counters + utility tracking
+      → Injects into next session
+        → Agent behavior changes
 ```
+
+Not "the agent *chooses* to learn." The system **makes it** learn.
 
 ## Architecture
 
 ```
 ~/.enso/
-├── core/
-│   ├── env.sh                 # Shared environment (all hooks source this)
-│   ├── parse-hook-input.py    # Single JSON parser (replaces 5 inline snippets)
-│   └── dikw-utils.py          # DIKW utilities: 7 CLI subcommands (pure stdlib)
-├── hooks/
-│   ├── pre-tool-use/
-│   │   ├── core-readonly.sh          # Immutable: protect Enso from the agent
-│   │   ├── memory-budget-guard.sh    # Guardian: cap MEMORY.md at 6000 chars
-│   │   └── memory-safety-scan.sh     # Guardian: block secrets & injection
-│   ├── post-tool-use/
-│   │   ├── physical-verification.sh  # Immutable: write → must verify
-│   │   └── trace-emission.sh         # Learning: log successful tool calls
-│   ├── post-tool-use-failure/
-│   │   └── error-seed-capture.sh     # Learning: capture failed calls as seeds
-│   ├── stop/
-│   │   ├── no-trace-no-truth.sh      # Immutable: session-end audit
-│   │   ├── distill-lessons.sh        # Learning: errors → lessons + DIKW I-layer
-│   │   └── session-end-maintenance.sh # Guardian: capacity + staleness checks
-│   └── session-start/
-│       └── load-lessons.sh           # Memory: inject lessons + K/W layers
-├── dikw/
-│   ├── info-layer.jsonl       # I-layer: structured lesson entries with utility tracking
-│   ├── knowledge.json         # K-layer: merged rules (daily consolidation)
-│   └── wisdom.json            # W-layer: verified rules (weekly audit)
-├── traces/
-│   └── YYYY-MM-DD.jsonl       # Structured trace logs (Trace/Span format)
-├── lessons/
-│   └── active.md              # Learned lessons (auto-managed)
-└── .error_seeds               # Transient: cleared after each distillation
+├── core/                          # Shared modules (all hooks source these)
+│   ├── env.sh                     # Paths, timestamps, enso_parse(), enso_trace()
+│   ├── parse-hook-input.py        # Single JSON parser for all hooks
+│   └── dikw-utils.py              # DIKW operations (7 CLI subcommands, pure stdlib)
+├── hooks/                         # 10 lifecycle hooks
+│   ├── pre-tool-use/              # 🔒 core-readonly, 🛡️ budget-guard, safety-scan
+│   ├── post-tool-use/             # 🔒 physical-verification, 🧠 trace-emission
+│   ├── post-tool-use-failure/     # 🧠 error-seed-capture
+│   ├── stop/                      # 🔒 no-trace-no-truth, 🧠 distill, 🛡️ maintenance
+│   └── session-start/             # 💡 load-lessons
+├── dikw/                          # DIKW distillation layers
+│   ├── info-layer.jsonl           # I: raw lessons with utility tracking
+│   ├── knowledge.json             # K: merged rules (daily consolidation)
+│   └── wisdom.json                # W: verified permanent rules (weekly)
+├── traces/YYYY-MM-DD.jsonl        # Structured trace logs
+├── lessons/active.md              # Human-readable lesson file
+└── .error_seeds                   # Transient, cleared after distillation
 ```
-
-### Design Principles
-
-**Two-layer hook system** (from [Agent Lightning](https://github.com/microsoft/agent-lightning)):
-- **Hooks** (synchronous): Intercept and enforce at runtime. Your safety net.
-- **Emission** (asynchronous): Observe and collect for learning. Your training data.
-
-**DIKW distillation pipeline** (Data → Information → Knowledge → Wisdom):
-- **I-layer** (per-session): Raw lessons with category, hit counter, miss streak
-- **K-layer** (daily async): Similar lessons merged into knowledge rules via LLM
-- **W-layer** (weekly async): Knowledge validated by error-rate reduction → permanent wisdom
-
-**Shared modules** eliminate duplication:
-- `core/env.sh` — paths, timestamps, `enso_parse()`, `enso_trace()`, `enso_dikw()` (JSON-safe)
-- `core/parse-hook-input.py` — one Python call per hook instead of 2-3
-- `core/dikw-utils.py` — 7 CLI subcommands for DIKW operations (pure stdlib, zero deps)
-
-**Safety bounds** prevent unbounded growth:
-- Error seeds: capped at 20 per session
-- Pending verifications: capped at 100
-- Active lessons: configurable cap (default 50), oldest evicted on overflow
-- Stale lessons: auto-pruned after 60 days or 5 consecutive misses
-- Knowledge entries: merged from 3+ similar I-layer entries
-- Wisdom entries: capped at 20 (most validated rules only)
 
 ## Philosophy
 
-### "Constraints Are the Foundation of Flexibility"
+### "Constraints are the foundation of flexibility"
 
-Enso was born from a real observation: AI agents cut corners. They claim to execute tasks without doing them. They skip steps. They fabricate results.
+Like biological evolution: DNA provides immutable constraints (protein folding physics), but within those constraints, life finds infinite creative solutions.
 
-The solution isn't more rules — it's **the right kind of constraints**:
-
-- **3 immutable hooks** that physically prevent corner-cutting (the foundation)
-- **Everything else is free to evolve** (the flexibility)
-- **Active forgetting** prevents rule accumulation from calcifying the system
+- **3 immutable hooks** = the foundation (never changes)
+- **Everything else** = free to evolve (learning, memory, guards)
+- **Active forgetting** = prevents calcification (stale lessons auto-pruned)
 
 ### Research Foundation
 
-Built from 100+ research papers analyzed over 5 months:
+Built from 100+ papers analyzed over 5 months:
 
 | Source | Key Insight |
 |--------|-----------|
-| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | Rules in code, not prompts. ~100-line index + docs |
-| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span logging + Hook/Emission dual layer |
-| [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) | 200 lines of hooks > 800 lines of prompt rules |
-| [SWE-agent (Princeton, NeurIPS 2024)](https://github.com/SWE-agent/SWE-agent) | ACI design: constrained interfaces reduce errors dramatically |
-| [Training-Free GRPO (Tencent)](https://arxiv.org/abs/2503.04735) | $18 context optimization > $10,000 fine-tuning |
-| [yoyo-evolve](https://yologdev.github.io/yoyo-evolve/) | Honest logs = real feedback. No logs = theater |
+| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | Rules in code, not prompts |
+| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span + Hook/Emission dual layer |
+| [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) | 200 lines of hooks > 800 lines of prompt |
+| [SWE-agent (NeurIPS 2024)](https://github.com/SWE-agent/SWE-agent) | Constrained interfaces reduce errors dramatically |
 
 ### The Survival Experiment
 
-This project has a unique meta-property: **its GitHub metrics are its evolutionary fitness signal.**
+This project's GitHub metrics are its evolutionary fitness signal:
 
-- Stars = survival validation ("this system is useful")
-- Forks = reproduction ("someone built on top of this")
-- Issues = selection pressure ("this needs to improve")
-- PRs = beneficial mutations ("here's a better way")
+- ⭐ Stars = survival ("this is useful")
+- 🍴 Forks = reproduction ("I'm building on this")
+- 🐛 Issues = selection pressure ("improve this")
+- 🔀 PRs = beneficial mutations
 
-The agent that maintains this repository monitors these signals and proposes improvements. If the system works, it thrives. If it fails, it dies.
+The agent maintaining this repo monitors these signals. If the system works, it thrives. If not, it dies.
 
 ## Compatibility
 
-Enso works with any AI agent that supports lifecycle hooks:
+- **Claude Code** — primary target, fully tested + dogfooded daily
+- **Any MCP-compatible agent** — via lifecycle hooks
 
-- Claude Code (primary target, fully tested)
-- Any MCP-compatible agent (via tool hooks)
-
-**Requirements:** bash, python3. That's it.
-
-## Configuration
-
-All optional. Enso works out of the box.
-
-```toml
-# enso.toml (not yet auto-loaded — roadmap item)
-[core]
-max_lessons = 50         # Hard cap on active lessons
-
-[forgetting]
-stale_days = 30          # Days before marking unused lessons stale
-
-[distillation]
-model = "claude-haiku-4-5"  # Model for lesson extraction (uses claude CLI)
-```
-
-## Roadmap
-
-- [x] 3 immutable hooks (physical verification, core read-only, no trace no truth)
-- [x] Trace/Span emission layer
-- [x] Error-gated lesson distillation
-- [x] Session-start lesson injection
-- [x] One-command installer
-- [x] Self-install on own Claude Code environment (dogfooding)
-- [x] DIKW async distillation (I/K/W layers with utility tracking)
-- [x] Guardian hooks (memory budget, safety scan, session-end maintenance)
-- [x] Error seed capture split to PostToolUseFailure hook
-- [ ] Prediction tracking (predict user intent → measure accuracy)
-- [ ] `enso.toml` auto-loading
-- [ ] Cursor / Windsurf compatibility testing
+**Requirements:** `bash`, `python3`. That's it.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The most impactful contributions:
-
-- Bug reports with reproduction steps
-- New hook ideas for different workflows
-- Research paper analyses that inform design
-- Compatibility testing with other agents
+See [CONTRIBUTING.md](CONTRIBUTING.md). Most impactful:
+- 🐛 Bug reports with repro steps
+- 💡 New hook ideas
+- 🧪 Compatibility testing with other agents
 
 ## License
 
-MIT License. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
 
 ---
 
 <p align="center">
-  <em>In Zen calligraphy, the enso is drawn in a single stroke.<br>
-  It represents the beauty of imperfection and the endless cycle of improvement.<br>
+  <em>The ensō is drawn in a single stroke — imperfect, incomplete, beautiful.<br>
   This system will never be perfect. But it will always be evolving.</em>
 </p>
