@@ -1,28 +1,13 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-# Enso Installer
-# ═══════════════════════════════════════════════════════════════
-# One command: curl -fsSL https://raw.githubusercontent.com/enso-os/enso/main/install.sh | bash
-#
-# What it does:
-#   1. Creates ~/.enso/ directory structure
-#   2. Copies hook scripts
-#   3. Registers hooks in Claude Code settings.json
-#   4. Makes all hooks executable
-#
-# What it does NOT do:
-#   - Modify any existing hooks or settings (non-destructive)
-#   - Require sudo or elevated permissions
-#   - Install any dependencies (pure bash)
+# Enso Installer v0.2.0
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-ENSO_VERSION="0.1.0"
+ENSO_VERSION="0.2.0"
 ENSO_DIR="$HOME/.enso"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 
-# Colors
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
@@ -30,15 +15,14 @@ NC='\033[0m'
 
 echo ""
 echo -e "${CYAN}○ Enso v${ENSO_VERSION}${NC}"
-echo -e "${CYAN}  A Self-Evolving Personal Agent OS${NC}"
+echo -e "${CYAN}  A Self-Evolving Harness for AI Agents${NC}"
 echo ""
 
 # ─── 1. Create directory structure ───
 echo -e "${YELLOW}→${NC} Creating ~/.enso/ ..."
-mkdir -p "$ENSO_DIR"/{hooks/{pre-tool-use,post-tool-use,stop,session-start},traces,lessons,memory,core}
+mkdir -p "$ENSO_DIR"/{hooks/{pre-tool-use,post-tool-use,post-tool-use-failure,stop,session-start},traces,lessons,memory,core,dikw}
 
-# ─── 2. Determine source directory ───
-# If run from the repo, use local files. Otherwise, download from GitHub.
+# ─── 2. Determine source ───
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -f "$SCRIPT_DIR/harness/hooks/post-tool-use/trace-emission.sh" ]; then
@@ -49,16 +33,20 @@ else
     SOURCE="remote"
     HOOK_SRC="$ENSO_DIR/.download_tmp/hooks"
     CORE_SRC="$ENSO_DIR/.download_tmp/core"
-    mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,stop,session-start} "$CORE_SRC"
-    BASE_URL="https://raw.githubusercontent.com/enso-os/enso/main/harness"
+    mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,post-tool-use-failure,stop,session-start} "$CORE_SRC"
+    BASE_URL="https://raw.githubusercontent.com/amazinglvxw/enso-os/main/harness"
     echo -e "${YELLOW}→${NC} Downloading from GitHub..."
+    # Core
     curl -fsSL "$BASE_URL/core/env.sh" -o "$CORE_SRC/env.sh"
     curl -fsSL "$BASE_URL/core/parse-hook-input.py" -o "$CORE_SRC/parse-hook-input.py"
+    curl -fsSL "$BASE_URL/core/dikw-utils.py" -o "$CORE_SRC/dikw-utils.py"
+    # Hooks
     curl -fsSL "$BASE_URL/hooks/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
     curl -fsSL "$BASE_URL/hooks/pre-tool-use/memory-budget-guard.sh" -o "$HOOK_SRC/pre-tool-use/memory-budget-guard.sh"
     curl -fsSL "$BASE_URL/hooks/pre-tool-use/memory-safety-scan.sh" -o "$HOOK_SRC/pre-tool-use/memory-safety-scan.sh"
     curl -fsSL "$BASE_URL/hooks/post-tool-use/physical-verification.sh" -o "$HOOK_SRC/post-tool-use/physical-verification.sh"
     curl -fsSL "$BASE_URL/hooks/post-tool-use/trace-emission.sh" -o "$HOOK_SRC/post-tool-use/trace-emission.sh"
+    curl -fsSL "$BASE_URL/hooks/post-tool-use-failure/error-seed-capture.sh" -o "$HOOK_SRC/post-tool-use-failure/error-seed-capture.sh"
     curl -fsSL "$BASE_URL/hooks/stop/no-trace-no-truth.sh" -o "$HOOK_SRC/stop/no-trace-no-truth.sh"
     curl -fsSL "$BASE_URL/hooks/stop/distill-lessons.sh" -o "$HOOK_SRC/stop/distill-lessons.sh"
     curl -fsSL "$BASE_URL/hooks/stop/session-end-maintenance.sh" -o "$HOOK_SRC/stop/session-end-maintenance.sh"
@@ -67,29 +55,30 @@ fi
 
 # ─── 3. Copy core + hooks ───
 echo -e "${YELLOW}→${NC} Installing from $SOURCE..."
+# Core modules
 cp "$CORE_SRC/env.sh" "$ENSO_DIR/core/"
 cp "$CORE_SRC/parse-hook-input.py" "$ENSO_DIR/core/"
+cp "$CORE_SRC/dikw-utils.py" "$ENSO_DIR/core/"
+# Hooks (use globs to catch all scripts per directory)
 cp "$HOOK_SRC/pre-tool-use/"*.sh "$ENSO_DIR/hooks/pre-tool-use/"
-cp "$HOOK_SRC/post-tool-use/physical-verification.sh" "$ENSO_DIR/hooks/post-tool-use/"
-cp "$HOOK_SRC/post-tool-use/trace-emission.sh" "$ENSO_DIR/hooks/post-tool-use/"
+cp "$HOOK_SRC/post-tool-use/"*.sh "$ENSO_DIR/hooks/post-tool-use/"
+cp "$HOOK_SRC/post-tool-use-failure/"*.sh "$ENSO_DIR/hooks/post-tool-use-failure/"
 cp "$HOOK_SRC/stop/"*.sh "$ENSO_DIR/hooks/stop/"
-cp "$HOOK_SRC/session-start/load-lessons.sh" "$ENSO_DIR/hooks/session-start/"
-chmod +x "$ENSO_DIR/hooks"/{pre-tool-use,post-tool-use,stop,session-start}/*.sh "$ENSO_DIR/core/env.sh"
+cp "$HOOK_SRC/session-start/"*.sh "$ENSO_DIR/hooks/session-start/"
+chmod +x "$ENSO_DIR/hooks"/{pre-tool-use,post-tool-use,post-tool-use-failure,stop,session-start}/*.sh "$ENSO_DIR/core/env.sh"
 
-# Clean up download temp
-[ "$SOURCE" = "remote" ] && rm -rf "$ENSO_DIR/.download_tmp"
+[ "$SOURCE" = "remote" ] && rm -r "$ENSO_DIR/.download_tmp"
 
 # ─── 4. Register hooks in Claude Code settings ───
-echo -e "${YELLOW}→${NC} Registering hooks in Claude Code settings..."
+echo -e "${YELLOW}→${NC} Registering hooks..."
 
 if [ ! -f "$CLAUDE_SETTINGS" ]; then
     mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
     echo '{}' > "$CLAUDE_SETTINGS"
 fi
 
-# Use Python to safely merge hook config into settings.json
 python3 << 'PYEOF'
-import json, sys, os
+import json, os
 
 settings_path = os.path.expanduser("~/.claude/settings.json")
 enso_dir = os.path.expanduser("~/.enso")
@@ -99,7 +88,6 @@ with open(settings_path, "r") as f:
 
 hooks = settings.setdefault("hooks", {})
 
-# Define Enso hooks
 enso_hooks = {
     "PreToolUse": [
         {
@@ -117,6 +105,14 @@ enso_hooks = {
             "hooks": [
                 {"type": "command", "command": f"bash {enso_dir}/hooks/post-tool-use/physical-verification.sh"},
                 {"type": "command", "command": f"bash {enso_dir}/hooks/post-tool-use/trace-emission.sh"}
+            ]
+        }
+    ],
+    "PostToolUseFailure": [
+        {
+            "matcher": "",
+            "hooks": [
+                {"type": "command", "command": f"bash {enso_dir}/hooks/post-tool-use-failure/error-seed-capture.sh"}
             ]
         }
     ],
@@ -140,45 +136,38 @@ enso_hooks = {
     ]
 }
 
-# Merge: add Enso hooks without overwriting existing ones
 for event_type, new_rules in enso_hooks.items():
     existing = hooks.get(event_type, [])
-    # Check if Enso hooks already registered (by checking for enso_dir in commands)
     enso_registered = any(enso_dir in str(rule) for rule in existing)
     if not enso_registered:
         hooks[event_type] = existing + new_rules
     else:
-        print(f"  ⏭  {event_type}: Enso hooks already registered, skipping")
+        print(f"  ⏭  {event_type}: already registered")
 
 settings["hooks"] = hooks
 
 with open(settings_path, "w") as f:
     json.dump(settings, f, indent=2)
 
-print("  ✅ Hooks registered in settings.json")
+print("  ✅ Hooks registered")
 PYEOF
 
-# ─── 5. Initialize lessons file ───
-if [ ! -f "$ENSO_DIR/lessons/active.md" ]; then
-    cat > "$ENSO_DIR/lessons/active.md" << 'INIT'
-# Enso Active Lessons
-# Auto-distilled from error seeds. Hit counter tracks usefulness.
-# Format: - [YYYY-MM-DD] [hits:N] lesson text
-
-INIT
-fi
+# ─── 5. Initialize data files ───
+[ -f "$ENSO_DIR/lessons/active.md" ] || printf '# Enso Active Lessons\n# Format: - [YYYY-MM-DD] [hits:N] lesson text\n\n' > "$ENSO_DIR/lessons/active.md"
+[ -f "$ENSO_DIR/dikw/info-layer.jsonl" ] || touch "$ENSO_DIR/dikw/info-layer.jsonl"
+[ -f "$ENSO_DIR/dikw/knowledge.json" ] || echo '[]' > "$ENSO_DIR/dikw/knowledge.json"
+[ -f "$ENSO_DIR/dikw/wisdom.json" ] || echo '[]' > "$ENSO_DIR/dikw/wisdom.json"
 
 # ─── Done ───
+HOOK_COUNT=$(find "$ENSO_DIR/hooks" -name "*.sh" | wc -l | tr -d ' ')
 echo ""
-echo -e "${GREEN}✅ Enso v${ENSO_VERSION} installed successfully!${NC}"
+echo -e "${GREEN}✅ Enso v${ENSO_VERSION} installed${NC}"
 echo ""
 echo "   Directory:  ~/.enso/"
-echo "   Hooks:      6 scripts registered"
+echo "   Hooks:      $HOOK_COUNT scripts"
+echo "   DIKW:       ~/.enso/dikw/ (info → knowledge → wisdom)"
 echo "   Traces:     ~/.enso/traces/"
 echo "   Lessons:    ~/.enso/lessons/active.md"
 echo ""
-echo -e "   ${CYAN}Your agent now learns from every session.${NC}"
 echo -e "   ${CYAN}Start a new Claude Code session to begin.${NC}"
-echo ""
-echo -e "   Uninstall: ${YELLOW}rm -rf ~/.enso && # remove enso entries from ~/.claude/settings.json${NC}"
 echo ""
