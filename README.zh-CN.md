@@ -1,7 +1,12 @@
 <p align="center">
-  <h1 align="center">Enso</h1>
-  <p align="center"><strong>一个让 AI 从错误中学习的系统</strong></p>
-  <p align="center"><em>不改模型，不花钱微调，10 个 Hook + DIKW 蒸馏管线。952 行代码。</em></p>
+  <img src="docs/assets/hero-banner.png" alt="Enso — 自进化 AI Agent Harness" width="100%">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
+  <a href="#"><img src="https://img.shields.io/badge/代码量-952行-brightgreen" alt="952 LOC"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
+  <a href="#"><img src="https://img.shields.io/badge/依赖-零-blue" alt="Zero Deps"></a>
 </p>
 
 <p align="center">
@@ -13,6 +18,12 @@
 </p>
 
 ---
+
+**别再让你的 AI 助手犯同样的错了。**
+
+<p align="center">
+  <img src="docs/assets/before-after.png" alt="有无 Enso 的区别" width="85%">
+</p>
 
 ## 问题是什么？
 
@@ -69,6 +80,10 @@ rm -rf ~/.enso
 3. **记住教训**（下次开机就知道）
 
 ## 三层架构
+
+<p align="center">
+  <img src="docs/assets/architecture.png" alt="Enso 架构" width="85%">
+</p>
 
 ```
 你（用户）
