@@ -12,30 +12,31 @@ MAX_LESSONS="${ENSO_MAX_LESSONS:-50}"
 enso_enforce_lesson_cap "$MAX_LESSONS"
 
 # ─── 2. Lessons stale cleanup: stale+7days → real delete ───
-if [ -f "$ENSO_LESSONS_FILE" ]; then
-    python3 -c "
-import re, sys
+if [ -f "$ENSO_LESSONS_FILE" ] && grep -q '\[stale\]' "$ENSO_LESSONS_FILE" 2>/dev/null; then
+    ENSO_LESSONS_FILE_EV="$ENSO_LESSONS_FILE" python3 -c '
+import re, sys, os
 from datetime import datetime, timedelta
 
-cutoff = (datetime.now() - timedelta(days=37)).strftime('%Y-%m-%d')  # 30 days stale + 7 days grace
-with open('$ENSO_LESSONS_FILE', 'r') as f:
+lessons_file = os.environ["ENSO_LESSONS_FILE_EV"]
+cutoff = (datetime.now() - timedelta(days=37)).strftime("%Y-%m-%d")
+
+with open(lessons_file, "r") as f:
     lines = f.readlines()
 
-kept = []
-deleted = 0
+kept, deleted = [], 0
 for line in lines:
-    if line.startswith('- ') and '[stale]' in line:
-        m = re.match(r'^- \[(\d{4}-\d{2}-\d{2})\]', line)
+    if line.startswith("- ") and "[stale]" in line:
+        m = re.match(r"^- \[(\d{4}-\d{2}-\d{2})\]", line)
         if m and m.group(1) < cutoff:
             deleted += 1
             continue
     kept.append(line)
 
 if deleted > 0:
-    with open('$ENSO_LESSONS_FILE', 'w') as f:
+    with open(lessons_file, "w") as f:
         f.writelines(kept)
-    print(f'[enso] Deleted {deleted} stale lesson(s) (>37 days)', file=sys.stderr)
-" 2>/dev/null || true
+    print(f"[enso] Deleted {deleted} stale lesson(s) (>37 days)", file=sys.stderr)
+' 2>/dev/null || true
 fi
 
 # ─── 3. MEMORY.md: downsink completed items to Archive section ───
@@ -52,37 +53,48 @@ if [ -n "$MEMORY_FILE" ]; then
 
     # Only trigger downsink when approaching budget (>83%)
     if [ "$CHARS" -gt 5000 ]; then
-        python3 -c "
-import re, sys
+        ENSO_MEMORY_FILE_EV="$MEMORY_FILE" python3 -c '
+import re, sys, os
 from datetime import datetime, timedelta
 
-cutoff_7d = (datetime.now() - timedelta(days=7)).strftime('%m-%d')
+memory_file = os.environ["ENSO_MEMORY_FILE_EV"]
+now = datetime.now()
+cutoff_dt = now - timedelta(days=7)
 
-with open('$MEMORY_FILE', 'r') as f:
+with open(memory_file, "r") as f:
     lines = f.readlines()
 
-archive_lines = []
-kept_lines = []
+archive_lines, kept_lines = [], []
 for line in lines:
-    # Downsink completed items older than 7 days
-    if '✅' in line and '完成' in line:
-        # Check if there's a date pattern [MM-DD] older than 7 days
-        dates = re.findall(r'\[(\d{2}-\d{2})\]', line)
-        if dates and dates[-1] < cutoff_7d:
-            archive_lines.append(line)
-            continue
+    # Match completed items (✅ emoji alone signals completion)
+    if "\u2705" in line:
+        # Extract [MM-DD] dates and compare with year awareness
+        dates = re.findall(r"\[(\d{2}-\d{2})\]", line)
+        if dates:
+            last_date_str = dates[-1]
+            month, day = int(last_date_str[:2]), int(last_date_str[3:])
+            # Assume current year; if date is in future, assume last year
+            try:
+                candidate_dt = datetime(now.year, month, day)
+                if candidate_dt > now:
+                    candidate_dt = datetime(now.year - 1, month, day)
+                if candidate_dt < cutoff_dt:
+                    archive_lines.append(line)
+                    continue
+            except ValueError:
+                pass
     kept_lines.append(line)
 
 if archive_lines:
-    # Append to archive file instead of deleting
-    archive_path = '$MEMORY_FILE'.replace('MEMORY.md', 'archive/memory-retired.md')
-    with open(archive_path, 'a') as f:
-        f.write(f'\n## Retired {datetime.now().strftime(\"%Y-%m-%d\")}\n')
+    archive_path = memory_file.replace("MEMORY.md", "archive/memory-retired.md")
+    os.makedirs(os.path.dirname(archive_path), exist_ok=True)
+    with open(archive_path, "a") as f:
+        f.write(f"\n## Retired {now.strftime(\"%Y-%m-%d\")}\n")
         f.writelines(archive_lines)
-    with open('$MEMORY_FILE', 'w') as f:
+    with open(memory_file, "w") as f:
         f.writelines(kept_lines)
-    print(f'[enso] Downsunk {len(archive_lines)} completed item(s) to archive', file=sys.stderr)
-" 2>/dev/null || true
+    print(f"[enso] Downsunk {len(archive_lines)} completed item(s) to archive", file=sys.stderr)
+' 2>/dev/null || true
     fi
 
     # Budget warning
