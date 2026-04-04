@@ -122,6 +122,21 @@ Not "the agent *chooses* to learn." The system **makes it** learn.
 └── .error_seeds                   # Transient, cleared after distillation
 ```
 
+## Forgetting: The Missing Layer
+
+Most memory systems only grow. Enso actively forgets — because **not forgetting is more dangerous than forgetting** ([EvoClaw, NeurIPS 2024](https://arxiv.org/abs/2603.13428): unverified memories → snowball effect → systematic drift).
+
+| Mechanism | What it does | Trigger |
+|-----------|-------------|---------|
+| **Stale decay** | Lessons unused >37 days → auto-deleted | Session end |
+| **LRU eviction** | Over 50 lessons → oldest evicted | Session end |
+| **MEMORY.md downsink** | Completed items (✅ >7 days) → moved to archive | When >83% capacity |
+| **Trace rotation** | Trace files >14 days → deleted | Daily cron |
+| **Log truncation** | execution-log >500 entries → truncated | Daily cron |
+| **Recovery safety net** | Deleted lesson reappears as error → flagged for review | On distillation |
+
+Inspired by Claude Code's Auto Dream (Orient→Gather→Consolidate→**Prune**), but code-enforced rather than model-dependent.
+
 ## Philosophy
 
 ### "Constraints are the foundation of flexibility"
