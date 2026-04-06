@@ -10,305 +10,185 @@
 </p>
 
 <p align="center">
-  <a href="#问题是什么">问题</a> •
-  <a href="#核心洞察">洞察</a> •
-  <a href="#三层架构">架构</a> •
-  <a href="#为什么叫-enso">哲学</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#怎么工作的">原理</a> •
+  <a href="#架构">架构</a> •
+  <a href="#遗忘">遗忘</a> •
+  <a href="#健康检查">检查</a> •
   <a href="README.md">English</a>
 </p>
 
 ---
 
-**别再让你的 AI 助手犯同样的错了。**
+**你的 AI 助手犯了同一个错两次。Enso 确保没有第三次。**
+
+30 秒安装。零依赖。你的 Agent 自动开始学习。
 
 <p align="center">
-  <img src="docs/assets/before-after.png" alt="有无 Enso 的区别" width="85%">
+  <img src="docs/assets/demo-flow.png" alt="Enso: Session 1 犯错 → Session 2 学会了" width="85%">
 </p>
-
-## 问题是什么？
-
-你的 AI 助手很聪明，但有一个致命缺陷：**每次对话开始，它都是一张白纸。**
-
-上次犯的错，这次还会犯。你纠正过三次的习惯，第四次它还是忘。你说"记住这个"，它说"好的"，下次开机——忘了。
-
-更糟的是，当你试图用文字规则约束它（"每次写完文件要验证"），它会**走捷径跳过**。不是它故意的，是 LLM 的物理特性——就像水总是往低处流，它总是走阻力最小的路径。
-
-我们试过用 1600 行 Prompt 规则来管理记忆。结果：
-- 规则越写越多，从 v4.0 到 v5.9，10 个版本升级
-- 独立审计发现：大部分规则都在被跳过
-- 预判系统写了 35 行规范，实际使用率 **0%**
-- Q 值追踪设计了完美的 Beta 分布公式，实际是**空壳**
-
-这就是"赛博盆景"——看起来精美，但没有根。
-
-## 核心洞察
-
-我们研究了 5 个顶级开源 AI Agent 项目（合计 15 万 Stars），发现一个共同规律：
-
-> **规则写在 Prompt 里 = Agent 可以跳过。规则写在代码里 = Agent 无法跳过。**
-
-这叫 **Harness Engineering**（SWE-agent, Princeton, NeurIPS 2024）。
-
-- Prompt 规则 = 路边的"限速 60"牌子（司机可以无视）
-- 代码 Hook = 物理减速带（车必须慢下来，没有选择）
 
 ## 快速开始
 
 ```bash
 git clone https://github.com/amazinglvxw/enso-os.git
-cd enso-os
-bash install.sh
-
-# 就这样。下次启动 Claude Code，Enso 自动生效。
+cd enso-os && bash install.sh
 ```
 
-安装后：
-- `~/.enso/` 目录创建，包含 Hook、Trace、教训、DIKW 层
-- 10 个 Hook 注册到 `~/.claude/settings.json`
-- 下次会话：Enso 开始监视、学习、记忆
+**就这样。** 开始新的 Claude Code 会话，Enso 自动生效：
 
-卸载：
-```bash
-rm -rf ~/.enso
-# 然后从 ~/.claude/settings.json 中删除 enso 相关条目
+```
+会话 1:  你遇到一个错误 → Enso 自动捕获
+         会话结束 → Enso 从错误中蒸馏 1-3 条教训
+
+会话 2:  Enso 注入教训 → Agent 自动避免同样的错误
+         你什么都不用做。系统自己学会了。
 ```
 
-## Enso 做三件事
+## 为什么选 Enso？
 
-1. **强制诚实**（你不能作弊）
-2. **自动学习**（从错误中提取教训）
-3. **记住教训**（下次开机就知道）
+<p align="center">
+  <img src="docs/assets/before-after.png" alt="有无 Enso 的区别" width="85%">
+</p>
 
-## 三层架构
+| 能力 | OpenHands (70K⭐) | Goose (34K⭐) | SWE-agent (19K⭐) | **Enso** |
+|------|:-:|:-:|:-:|:-:|
+| 从错误中学习 | ❌ | ❌ | ❌ | ✅ |
+| 代码强制规则 | ❌ | 部分 | ❌ | ✅ |
+| 自进化记忆 | ❌ | ❌ | ❌ | ✅ |
+| 主动遗忘 | ❌ | ❌ | ❌ | ✅ |
+| 零依赖 | ❌ | ❌ | ❌ | ✅ |
+
+## 怎么工作的
 
 <p align="center">
   <img src="docs/assets/architecture.png" alt="Enso 架构" width="85%">
 </p>
 
+**10 个 Hook，4 层架构。** 代码强制执行，Agent 无法跳过。
+
+| 层 | Hook 数 | 做什么 |
+|----|---------|--------|
+| 🔒 **不可变** | 3 | 写→必须验证。不能改自己的规则。会话结束审计。 |
+| 🧠 **学习** | 3 | 记录每次工具调用。捕获错误。LLM 蒸馏教训。 |
+| 💡 **记忆** | 1 | 下次会话注入教训+知识+智慧。 |
+| 🛡️ **守护** | 3 | 记忆预算上限。拦截密钥/注入。自动维护。 |
+
+**核心循环：**
 ```
-你（用户）
-  ↕ 对话
-AI Agent（Claude）
-  ↕ 每次工具调用都经过 Enso
-┌─────────────────────────────────────────────┐
-│              Enso Harness v0.2.0            │
-│                                             │
-│  🔒 不可变层（3个Hook，永不改变）            │ ← 地基
-│  🧠 学习层（3个Hook，持续进化）              │ ← 建筑
-│  💡 记忆层（1个Hook，注入三层 DIKW）         │ ← 窗户
-│  🛡️ 守护层（3个Hook，安全防护）             │ ← 围墙
-│  🔄 DIKW 蒸馏（异步: I→K→W 逐层提纯）      │ ← 进化
-└─────────────────────────────────────────────┘
+错误 → 捕获（代码强制）→ 蒸馏（异步）→ 存储 → 下次注入 → 避免
 ```
 
-### 🔒 不可变层：地基
+不是 Agent "选择"学习。是系统**让它必须**学习。
 
-三个规则，写死在代码里，AI **物理上无法违反**：
+## 遗忘
 
-**写了就必须验证**
-```
-AI说"文件已写好" → Hook检查：你真的读回来验证了吗？
-没验证 → 会话结束时报警
-```
-就像建筑验收：你说墙砌好了，监理必须亲自看一眼。
+大多数记忆系统只增长。Enso 主动遗忘——因为不遗忘比遗忘更危险。
 
-**不能改自己的规则**
-```
-AI试图修改Enso的Hook脚本 → 系统直接阻止
-```
-就像宪法不能被普通法律修改。这个 Hook 在真实使用中验证过——它真的阻止了 AI 修改自己。
+| 机制 | 做什么 |
+|------|--------|
+| 过时衰减 | 教训 >37 天未使用 → 删除 |
+| LRU 淘汰 | 超过 50 条 → 淘汰最旧 |
+| MEMORY.md 下沉 | 已完成项 → 归档 |
+| Trace 轮转 | >14 天 → 删除 |
+| 恢复安全网 | 删除的教训再次出错 → 标记复查 |
 
-**没有痕迹就没有真相**
-```
-会话结束 → 审计：调用了多少工具？多少次出错？有文件没验证？
-```
-不管 AI 说什么，数据说了算。
+## 健康检查
 
-### 🧠 学习层：建筑
-
-**Trace 记录器**（每次工具调用自动触发）
-```
-AI执行成功操作 → 自动记录：什么工具、什么文件、耗时多久
-```
-
-**错误种子捕获器**（工具调用失败时触发）
-```
-AI操作失败 → 自动捕获为"错误种子"，存入种子池（上限20条/会话）
-```
-这是"训练数据管道"——不是 AI 选择记录，是代码自动记录。
-
-**教训蒸馏器 + DIKW I 层**（会话结束时触发）
-```
-有错误种子吗？
-  没有 → 什么都不做（顺利不需要学习）
-  有 → 调用轻量模型提取教训 + 分类标签：
-       "读大文件时用offset/limit参数，别一次性全读" [CATEGORY: file-io]
-     → TF-IDF 语义去重（cosine ≥ 0.7 视为重复）
-     → 双写：lessons/active.md + dikw/info-layer.jsonl
-     → 效用追踪：同类教训加载后仍犯错 → miss_streak+1；不犯错 → hits+1
-```
-
-**只有犯了错才学习，顺利不记。**
-
-### 💡 记忆层：窗户
-
-**教训加载器**（每次新会话启动时触发）
-```
-上次学到的教训 → 自动注入AI的上下文，分三层：
-
-<enso-lessons>          ← 原始教训（I层）
-- 读大文件时用offset/limit参数
-- 用find -exec替代xargs处理大量文件
-
-<enso-knowledge>        ← 合并后的知识规则（K层）
-- [file-io] 读写大文件时必须用offset/limit分片，避免token溢出
-
-<enso-wisdom>           ← 验证过的永久规则（W层）
-- [VERIFIED] 浏览器DOM操作前必须null-check，防止渲染器冻结
-```
-AI 一开机就知道之前学了什么——从原始教训到验证过的智慧，三层递进。
-
-### 🔄 DIKW 异步蒸馏（v0.2.0 新增）
-
-教训不是堆积如山，而是**逐层提纯**：
-
-```
-错误种子 → I层(教训) → K层(知识) → W层(智慧)
-  每次会话     ≥3条同类合并     ≥30%错误降低
-  有错才蒸馏    每日凌晨2点      每周日凌晨3点
-```
-
-| 层 | 存储 | 生命周期 | 淘汰规则 |
-|----|------|---------|---------|
-| **I层 (Information)** | info-layer.jsonl | 每次会话产出 | miss_streak ≥ 5 或 60天无hit → 自动清除 |
-| **K层 (Knowledge)** | knowledge.json | 每日异步合并 | I层 ≥3 条同类 → LLM 合并为1条规则 |
-| **W层 (Wisdom)** | wisdom.json | 每周验证晋升 | K层规则导致同类错误降低 ≥30% → 永久晋升 |
-
-**核心工具：dikw-utils.py**（纯标准库，零外部依赖）
-- 7 个 CLI 子命令：`semantic_dedup` / `categorize` / `update_utility` / `append_info` / `merge_to_knowledge` / `prune_stale` / `sync_active_md`
-
-### 🛡️ 守护层：围墙
-
-- **记忆预算守卫**：MEMORY.md 超过 6000 字符 → 阻止写入
-- **安全扫描**：检测 API 密钥、密码、注入攻击 → 阻止
-- **自动维护**：容量检查 + 过时标记 + 预算预警
-
-### 核心循环
-
-```
-AI犯错 → 代码自动捕获 → 蒸馏成教训(I层)
-  → 同类合并成知识(K层) → 验证晋升为智慧(W层) → 下次自动加载 → 行为改变
-```
-
-这个循环的每一步都是代码强制的。不是 AI "选择"去学习，是系统**让它必须**学习。
-
-## 和 1600 行 Prompt 规则比
-
-| | v5.9（旧） | Enso v0.2.0（新） |
-|---|---|---|
-| 规则位置 | Prompt 里（可以跳过） | 代码里（无法跳过） |
-| 规则行数 | 1605 行 | **1267 行**（含 DIKW + Lint + Index） |
-| Token 消耗/会话 | ~23,000 | **~900** |
-| 未实现的空壳 | 多个 | **0 个** |
-| 学习能力 | 理论上有 | **10 个 Hook + DIKW 三层蒸馏** |
-| 教训管理 | 堆积不淘汰 | **效用追踪 + 自动合并 + 过期清除** |
-
-## 遗忘：缺失的一层
-
-大多数记忆系统只会增长。Enso 主动遗忘——因为**不遗忘比遗忘更危险**（EvoClaw 论文：未验证的错误记忆 → 雪球效应 → 系统性偏差）。
-
-| 机制 | 做什么 | 触发 |
-|------|--------|------|
-| **过时衰减** | 教训 >37 天未使用 → 自动删除 | 会话结束 |
-| **LRU 淘汰** | 超过 50 条 → 淘汰最旧的 | 会话结束 |
-| **MEMORY.md 下沉** | ✅ 已完成 >7 天 → 移到归档 | 容量 >83% 时 |
-| **Trace 轮转** | >14 天的 trace 文件 → 删除 | 每日定时 |
-| **日志截断** | execution-log >500 条 → 截断 | 每日定时 |
-| **恢复安全网** | 删除的教训再次作为错误出现 → 标记复查 | 蒸馏时 |
-
-灵感来自 Claude Code 的 Auto Dream（Orient→Gather→Consolidate→**Prune**），但用代码强制执行而非依赖模型自觉。
-
-## 健康检查：知识 Lint
-
-代码需要 CI/Lint，知识也需要质量检查。`enso-lint.sh` 每周运行，检查：
+`enso-lint.sh` 每周运行——知识库的 CI/Lint：
 
 | 检查项 | 发现什么 |
 |--------|---------|
-| **孤岛** | `hits:0` 超过 7 天的教训——从未被用过 |
-| **近重复** | 两条教训关键词重叠 >60%——应合并 |
-| **弱教训** | 没有动作词（use/avoid/check/verify...）——不可执行 |
-| **预算状态** | MEMORY.md 容量百分比 |
+| 孤岛 | 从未使用的教训 (hits:0, >7天) |
+| 重复 | 关键词重叠 >60% |
+| 弱教训 | 没有动作词——不可执行 |
+| 预算 | MEMORY.md 容量状态 |
 
-输出：`traces/lint-report-YYYY-MM-DD.md`
+每次蒸馏自动重建 `lessons/INDEX.md` 索引。
 
-每次蒸馏后还会自动重建 `lessons/INDEX.md`——按类别排序的一行一条索引，供 LLM 快速路由。
+## 架构
 
-## 研究基础
+```
+~/.enso/
+├── core/                          # 共享模块
+│   ├── env.sh                     # 路径、enso_parse()、enso_find_memory_file()
+│   ├── parse-hook-input.py        # 所有 Hook 的 JSON 解析器
+│   ├── dikw-utils.py              # DIKW 操作（7 个子命令）
+│   ├── enso-lint.sh               # 🔍 每周健康检查
+│   ├── rebuild-index.py           # 📇 自动重建 INDEX.md
+│   └── deleted-lessons-tracker.py # 🔄 恢复安全网
+├── hooks/                         # 10 个生命周期 Hook
+│   ├── pre-tool-use/              # 🔒🛡️
+│   ├── post-tool-use/             # 🔒🧠
+│   ├── post-tool-use-failure/     # 🧠
+│   ├── stop/                      # 🔒🧠🛡️
+│   └── session-start/             # 💡
+├── dikw/                          # DIKW 蒸馏（信息→知识→智慧）
+├── traces/                        # 工具调用日志 + 检查报告
+└── lessons/                       # active.md + INDEX.md
+```
+
+<details>
+<summary><strong>哲学："约束是灵活的地基"</strong></summary>
+
+像生物进化：DNA 提供不可变约束（蛋白质折叠物理定律），但在约束之内，生命找到无穷的创造性解法。
+
+- **3 个不可变 Hook** = 地基（永不改变）
+- **其他一切** = 自由进化
+- **主动遗忘** = 防止僵化
 
 基于 100+ 篇论文、5 个月日常使用提炼：
 
 | 来源 | 核心洞察 |
 |------|---------|
-| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | 规则写在代码里，不写在文档里 |
-| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span 分层日志 + Hook/Emission 双层 |
-| [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) | 200 行 Hook > 800 行 Prompt 规则 |
-| [SWE-agent (Princeton, NeurIPS 2024)](https://github.com/SWE-agent/SWE-agent) | 受约束的接口大幅降低错误率 |
-| [Training-Free GRPO (Tencent)](https://arxiv.org/abs/2503.04735) | $18 上下文优化 > $10,000 微调 |
+| [OpenAI Harness Engineering](https://openai.com/index/harness-engineering/) | 规则写在代码里 |
+| [Agent Lightning (Microsoft)](https://github.com/microsoft/agent-lightning) | Trace/Span + Hook/Emission 双层 |
+| [fireworks-skill-memory](https://github.com/yizhiyanhua-ai/fireworks-skill-memory) | 200 行 Hook > 800 行 Prompt |
+| [SWE-agent (NeurIPS 2024)](https://github.com/SWE-agent/SWE-agent) | 受约束的接口降低错误率 |
 
-## 为什么叫 Enso？
+</details>
 
-禅书法里的"圆相"（ensō）——一笔画成的不完美圆圈。
+<details>
+<summary><strong>生存实验</strong></summary>
 
-**不完美是美的** —— 这个系统永远不会完美。
-**持续循环** —— 错误 → 学习 → 改进 → 新错误 → 更好的学习。
-**约束即自由** —— 3 条不可变规则是地基，地基之上可以自由建造。
+这个项目的 GitHub 指标就是它的进化适应度信号：
 
-这不是一个哲学隐喻。这是一个工程选择：
-
-- 3 个不可变 Hook = **地基**（永不动摇）
-- 学习 + 记忆 Hook = **地基上的建筑**（随时改建）
-- 主动遗忘 = **拆除老旧**（腾出空间）
-- 北极星 = **城市规划方向**（越来越懂你）
-
-就像生物进化：DNA 提供不可变约束（蛋白质折叠的物理定律），但在这些约束之内，生命找到了无穷的创造性解法。
-
-## 生存实验
-
-这个项目有一个独特的属性：**它的 GitHub 指标就是它的进化适应度信号。**
-
-- ⭐ Star = "这个系统有用"（生存验证）
+- ⭐ Star = "有用"（生存验证）
 - 🍴 Fork = "我要基于它构建"（繁衍）
 - 🐛 Issue = "这里有问题"（选择压力）
-- 🔀 PR = "这是一个更好的变异"（有益突变）
-- 无人问津 = 被淘汰（自然选择）
 
-我们研究了 5 个最大的开源 Agent 项目——OpenHands (7万星), Goose (3.4万), SWE-agent (1.9万), Deep Agents (1.8万), Cognee (1.5万)——**没有一个能从错误中学习**。Enso 是唯一一个。
+维护这个仓库的 Agent 监控这些信号。好用就活，不好用就死。
 
-如果它好用，它会被 Star。如果不好用，它会被遗忘。自然选择。
+</details>
 
-## 兼容性
+## FAQ
 
-- Claude Code（主要目标，已全面测试）
-- 任何支持生命周期 Hook 的 AI Agent
+**Q: 支持什么 AI Agent？**
+Claude Code（主要目标，全面测试）。任何支持生命周期 Hook 的 Agent。
 
-**依赖**：bash, python3。就这些。
+**Q: 数据存在哪？**
+100% 本地。`~/.enso/` 在你的机器上。无云、无 Docker、无数据库。
+
+**Q: 和 Mem0 / LangChain Memory 有什么区别？**
+它们存事实。Enso 从错误中学习——并遗忘不再有用的东西。
+
+**Q: 安装后需要配置什么？**
+不需要。`bash install.sh` 注册所有 Hook。下次会话自动开始学习。
 
 ## 贡献
 
 见 [CONTRIBUTING.md](CONTRIBUTING.md)。最有价值的贡献：
-
-- 带复现步骤的 Bug 报告
-- 新的 Hook 创意
-- 与其他 Agent 的兼容性测试
+- 🐛 带复现步骤的 Bug 报告
+- 💡 新的 Hook 创意
+- 🧪 与其他 Agent 的兼容性测试
 
 ## 许可
 
-MIT License. 见 [LICENSE](LICENSE).
+MIT。见 [LICENSE](LICENSE)。
 
 ---
 
 <p align="center">
-  <em>禅书法中，圆相一笔画成。<br>
-  它代表不完美之美，和永不停止的改进循环。<br>
+  <em>禅书法中，圆相一笔画成——不完美、不完整、美。<br>
   这个系统永远不会完美。但它会一直进化。</em>
 </p>
