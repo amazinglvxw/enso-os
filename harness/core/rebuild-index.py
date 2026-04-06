@@ -15,7 +15,7 @@ if not os.path.exists(lessons_file):
 lessons = []
 with open(lessons_file) as f:
     for line in f:
-        if not line.startswith("- "):
+        if not line.startswith("- ") or "[stale]" in line:
             continue
         # Extract date, hits, text
         m = re.match(r"^- \[(\d{4}-\d{2}-\d{2})\] \[hits:(\d+)\] (.+)", line.strip())

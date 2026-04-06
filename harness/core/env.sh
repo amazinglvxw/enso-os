@@ -65,3 +65,13 @@ export ENSO_SESSION_LOADED_IDS="${TMPDIR:-/tmp}/enso-session-loaded-ids-$$"
 enso_dikw() {
     python3 "$ENSO_DIKW_UTILS" "$@"
 }
+
+# Shared: find MEMORY.md across known locations
+enso_find_memory_file() {
+    for candidate in \
+        "$HOME/.claude/projects/-$(echo "$PWD" | tr '/' '-' | sed 's/^-//')/memory/MEMORY.md" \
+        "$PWD/memory/MEMORY.md" \
+        "$HOME/.claude/memory/MEMORY.md"; do
+        [ -f "$candidate" ] && echo "$candidate" && return
+    done
+}
