@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/代码量-1267行-brightgreen" alt="952 LOC"></a>
+  <a href="#"><img src="https://img.shields.io/badge/代码量-1267行-brightgreen" alt="1267 LOC"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/依赖-零-blue" alt="Zero Deps"></a>
 </p>
@@ -207,7 +207,7 @@ AI犯错 → 代码自动捕获 → 蒸馏成教训(I层)
 | | v5.9（旧） | Enso v0.2.0（新） |
 |---|---|---|
 | 规则位置 | Prompt 里（可以跳过） | 代码里（无法跳过） |
-| 规则行数 | 1605 行 | **952 行**（含 DIKW 工具库） |
+| 规则行数 | 1605 行 | **1267 行**（含 DIKW + Lint + Index） |
 | Token 消耗/会话 | ~23,000 | **~900** |
 | 未实现的空壳 | 多个 | **0 个** |
 | 学习能力 | 理论上有 | **10 个 Hook + DIKW 三层蒸馏** |
