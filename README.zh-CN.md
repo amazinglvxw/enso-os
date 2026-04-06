@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/代码量-952行-brightgreen" alt="952 LOC"></a>
+  <a href="#"><img src="https://img.shields.io/badge/代码量-1267行-brightgreen" alt="952 LOC"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/依赖-零-blue" alt="Zero Deps"></a>
 </p>
@@ -227,6 +227,21 @@ AI犯错 → 代码自动捕获 → 蒸馏成教训(I层)
 | **恢复安全网** | 删除的教训再次作为错误出现 → 标记复查 | 蒸馏时 |
 
 灵感来自 Claude Code 的 Auto Dream（Orient→Gather→Consolidate→**Prune**），但用代码强制执行而非依赖模型自觉。
+
+## 健康检查：知识 Lint
+
+代码需要 CI/Lint，知识也需要质量检查。`enso-lint.sh` 每周运行，检查：
+
+| 检查项 | 发现什么 |
+|--------|---------|
+| **孤岛** | `hits:0` 超过 7 天的教训——从未被用过 |
+| **近重复** | 两条教训关键词重叠 >60%——应合并 |
+| **弱教训** | 没有动作词（use/avoid/check/verify...）——不可执行 |
+| **预算状态** | MEMORY.md 容量百分比 |
+
+输出：`traces/lint-report-YYYY-MM-DD.md`
+
+每次蒸馏后还会自动重建 `lessons/INDEX.md`——按类别排序的一行一条索引，供 LLM 快速路由。
 
 ## 研究基础
 
