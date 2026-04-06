@@ -148,6 +148,9 @@ fi
 # Clear processed error seeds
 > "$ENSO_ERROR_SEEDS"
 
+# Rebuild lessons index for fast LLM routing
+ENSO_LESSONS_FILE="$ENSO_LESSONS_FILE" python3 "$ENSO_CORE/rebuild-index.py" 2>/dev/null || true
+
 # Write trace event
 enso_trace "ts" "$(enso_ts)" "span_type" "distillation" \
     "error_seeds" "$ERROR_COUNT" "lessons_added" "$NEW_COUNT"
