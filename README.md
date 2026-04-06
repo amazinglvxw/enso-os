@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
-  <a href="#"><img src="https://img.shields.io/badge/LOC-952-brightgreen" alt="952 Lines of Code"></a>
+  <a href="#"><img src="https://img.shields.io/badge/LOC-1267-brightgreen" alt="1267 Lines of Code"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hooks-10-orange" alt="10 Shell Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/Dependencies-0-blue" alt="Zero Dependencies"></a>
   <a href="#"><img src="https://img.shields.io/badge/Version-0.2.0-purple" alt="v0.2.0"></a>
@@ -103,10 +103,13 @@ Not "the agent *chooses* to learn." The system **makes it** learn.
 
 ```
 ~/.enso/
-├── core/                          # Shared modules (all hooks source these)
-│   ├── env.sh                     # Paths, timestamps, enso_parse(), enso_trace()
+├── core/                          # Shared modules
+│   ├── env.sh                     # Paths, timestamps, enso_parse(), enso_find_memory_file()
 │   ├── parse-hook-input.py        # Single JSON parser for all hooks
-│   └── dikw-utils.py              # DIKW operations (7 CLI subcommands, pure stdlib)
+│   ├── dikw-utils.py              # DIKW operations (7 CLI subcommands)
+│   ├── enso-lint.sh               # 🔍 Knowledge health check (weekly)
+│   ├── rebuild-index.py           # 📇 Auto-rebuild lessons/INDEX.md
+│   └── deleted-lessons-tracker.py # 🔄 Recovery safety net for deleted lessons
 ├── hooks/                         # 10 lifecycle hooks
 │   ├── pre-tool-use/              # 🔒 core-readonly, 🛡️ budget-guard, safety-scan
 │   ├── post-tool-use/             # 🔒 physical-verification, 🧠 trace-emission
@@ -117,8 +120,12 @@ Not "the agent *chooses* to learn." The system **makes it** learn.
 │   ├── info-layer.jsonl           # I: raw lessons with utility tracking
 │   ├── knowledge.json             # K: merged rules (daily consolidation)
 │   └── wisdom.json                # W: verified permanent rules (weekly)
-├── traces/YYYY-MM-DD.jsonl        # Structured trace logs
-├── lessons/active.md              # Human-readable lesson file
+├── traces/                        # Structured trace logs + lint reports
+│   ├── YYYY-MM-DD.jsonl           # Daily tool call traces
+│   └── lint-report-YYYY-MM-DD.md  # Weekly health check reports
+├── lessons/
+│   ├── active.md                  # Human-readable lesson file
+│   └── INDEX.md                   # Auto-generated one-line-per-lesson index
 └── .error_seeds                   # Transient, cleared after distillation
 ```
 
@@ -136,6 +143,21 @@ Most memory systems only grow. Enso actively forgets — because **not forgettin
 | **Recovery safety net** | Deleted lesson reappears as error → flagged for review | On distillation |
 
 Inspired by Claude Code's Auto Dream (Orient→Gather→Consolidate→**Prune**), but code-enforced rather than model-dependent.
+
+## Health Check: Knowledge Lint
+
+Like code needs CI/Lint, knowledge needs quality checks. `enso-lint.sh` runs weekly and catches:
+
+| Check | What it finds |
+|-------|--------------|
+| **Orphans** | Lessons with `hits:0` older than 7 days — never used, possibly irrelevant |
+| **Near-duplicates** | >60% keyword overlap between lessons — should be merged |
+| **Weak lessons** | No actionable verb (use/avoid/check/verify...) — not actionable |
+| **Budget status** | MEMORY.md capacity percentage |
+
+Output: `traces/lint-report-YYYY-MM-DD.md`
+
+Every distillation also auto-rebuilds `lessons/INDEX.md` — a one-line-per-lesson index sorted by category for fast LLM routing.
 
 ## Philosophy
 
