@@ -23,7 +23,7 @@
 
 **Stop letting your AI agent make the same mistakes.**
 
-Most AI agents — even the 100K+ star ones — are amnesiacs. They hit an error, fail, and make the exact same mistake next session. Enso fixes this with **952 lines of Shell** that your agent literally cannot skip.
+Most AI agents — even the 100K+ star ones — are amnesiacs. They hit an error, fail, and make the exact same mistake next session. Enso fixes this with **1267 lines of Shell** that your agent literally cannot skip.
 
 <p align="center">
   <img src="docs/assets/before-after.png" alt="Before vs After Enso" width="85%">
@@ -47,7 +47,7 @@ We studied 5 major open-source agent frameworks. **None of them learn from mista
 | Learns from past errors | ❌ | ❌ | ❌ | ✅ |
 | Rules enforced by code | ❌ | Partial | ❌ | ✅ |
 | Self-evolving memory | ❌ | ❌ | ❌ | ✅ |
-| Footprint | GBs | GBs | GBs | **952 LOC** |
+| Footprint | GBs | GBs | GBs | **1267 LOC** |
 
 > Prompt rules = speed limit signs (agent can ignore). Code hooks = physical speed bumps (no choice).
 
