@@ -6,7 +6,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
   <a href="#"><img src="https://img.shields.io/badge/LOC-1267-brightgreen" alt="1267 Lines of Code"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hooks-10-orange" alt="10 Shell Hooks"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Dependencies-0-blue" alt="Zero Dependencies"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Deps-bash%20%2B%20python3-blue" alt="bash + python3"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 **Your AI agent makes the same mistake twice. Enso makes sure there's no third time.**
 
-Install in 30 seconds. Zero dependencies. Your agent starts learning automatically.
+Install in 30 seconds. Just bash + python3 (pre-installed on macOS/Linux). Your agent starts learning automatically.
 
 <p align="center">
   <img src="docs/assets/demo-flow.png" alt="Enso: Session 1 error → Session 2 learned" width="85%">
@@ -59,7 +59,7 @@ Session 2:  Enso injects the lessons → Agent avoids the same mistake
 | Rules enforced by code | ❌ | Partial | ❌ | ✅ |
 | Self-evolving memory | ❌ | ❌ | ❌ | ✅ |
 | Active forgetting | ❌ | ❌ | ❌ | ✅ |
-| Zero dependencies | ❌ | ❌ | ❌ | ✅ |
+| Just bash + python3 | ❌ | ❌ | ❌ | ✅ |
 
 ## How It Works
 
@@ -166,13 +166,16 @@ The agent maintaining this repo monitors these signals. If the system works, it 
 ## FAQ
 
 **Q: What AI agents does this work with?**
-Claude Code (primary, fully tested). Any agent with lifecycle hooks.
+Claude Code (primary target, fully tested and dogfooded daily). Architecture is portable to any agent with lifecycle hooks, but install.sh currently targets Claude Code's settings.json.
 
 **Q: Where is my data stored?**
 100% local. `~/.enso/` on your machine. No cloud, no Docker, no database.
 
 **Q: How is this different from Mem0 or LangChain memory?**
 Those store facts. Enso learns from mistakes — and forgets what's no longer useful.
+
+**Q: What are the prerequisites?**
+`bash` and `python3` (3.6+). Both are pre-installed on macOS and most Linux distros. No pip install, no npm, no Docker.
 
 **Q: Do I need to configure anything after install?**
 No. `bash install.sh` registers all hooks. Next session, it starts learning.
