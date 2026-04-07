@@ -11,10 +11,9 @@
 
 <p align="center">
   <a href="#quickstart">Quickstart</a> •
+  <a href="#enso-vs-the-big-three">Comparison</a> •
   <a href="#how-it-works">How It Works</a> •
-  <a href="#architecture">Architecture</a> •
   <a href="#forgetting">Forgetting</a> •
-  <a href="#health-check">Health Check</a> •
   <a href="README.zh-CN.md">中文</a>
 </p>
 
@@ -35,7 +34,7 @@ git clone https://github.com/amazinglvxw/enso-os.git
 cd enso-os && bash install.sh
 ```
 
-**That's it.** Start a new Claude Code session. Enso is active. Here's what happens:
+**That's it.** Start a new Claude Code session. Enso is active:
 
 ```
 Session 1:  You hit an error → Enso captures it automatically
@@ -45,21 +44,66 @@ Session 2:  Enso injects the lessons → Agent avoids the same mistake
             You didn't do anything. The system learned by itself.
 ```
 
-**For Claude Code users** — Enso registers as lifecycle hooks. No config needed.
+## Enso vs. The Big Three
 
-## Why Enso?
+We built Enso after studying how Claude Code, OpenClaw, and Hermes Agent handle memory and learning. Here's an honest comparison — **what they do better than us, and what we do that they don't.**
 
-<p align="center">
-  <img src="docs/assets/before-after.png" alt="Without vs With Enso" width="85%">
-</p>
+### The Comparison
 
-| Feature | OpenHands (70K⭐) | Goose (34K⭐) | SWE-agent (19K⭐) | **Enso** |
-|---------|:-:|:-:|:-:|:-:|
-| Learns from past errors | ❌ | ❌ | ❌ | ✅ |
-| Rules enforced by code | ❌ | Partial | ❌ | ✅ |
-| Self-evolving memory | ❌ | ❌ | ❌ | ✅ |
-| Active forgetting | ❌ | ❌ | ❌ | ✅ |
-| Just bash + python3 | ❌ | ❌ | ❌ | ✅ |
+| Capability | Claude Code | OpenClaw | Hermes Agent (30K⭐) | **Enso** |
+|------------|:-----------:|:--------:|:-------------------:|:--------:|
+| **Learns from errors** | ❌ No | ❌ No | ✅ Auto-creates skills | ✅ Code-enforced |
+| **Forgetting** | Silent truncation at 200 lines | ❌ No | ❌ Skills only grow | ✅ Stale decay + LRU + health checks |
+| **Context compression** | ✅ 5-layer pipeline | ✅ Compaction | ❌ Basic | ❌ Relies on host agent |
+| **Dreaming / consolidation** | ✅ AutoDream (4-phase) | ✅ Light→REM→Deep | ❌ No | Partial (DIKW distillation) |
+| **Multi-platform** | Terminal only | Terminal + UI | 6 platforms | Terminal only (Claude Code) |
+| **Model support** | Anthropic only | Multiple | 200+ providers | Any (harness is model-agnostic) |
+| **Self-protection** | ❌ Agent can edit memory | ❌ No | ❌ No | ✅ Immutable hooks (agent blocked itself) |
+| **Knowledge quality checks** | ❌ No | ❌ No | ❌ No | ✅ Weekly lint (orphans, duplicates, weak) |
+| **Install complexity** | Built-in | npm + config | pip + API keys | `bash install.sh` (30 seconds) |
+| **Codebase size** | ~512K lines TS | ~50K lines | ~50K lines Python | **1,267 lines** Shell+Python |
+| **Dependencies** | Node.js runtime | Node.js + plugins | Python + RL framework | **bash + python3** |
+
+### What They Do Better (honestly)
+
+**Claude Code** has the most sophisticated context management we've seen — a [5-layer compression pipeline](https://openai.com/index/harness-engineering/) (tool-result budgeting → snip-compact → micro-compact → context-collapse → auto-compact) that Enso doesn't attempt to replicate. Its AutoDream 4-phase memory consolidation (Orient→Gather→Consolidate→Prune) is production-grade. Enso relies on Claude Code's own compression; it doesn't add its own.
+
+**OpenClaw** has the most elegant memory promotion system — its [Dreaming mechanism](https://docs.openclaw.ai/concepts/dreaming) uses 3 phases (Light→REM→Deep) with 6-signal weighted scoring to decide what becomes long-term memory. The staging buffer (Light/REM don't write to MEMORY.md, only Deep does) prevents memory fragmentation. Enso writes lessons more eagerly, which can cause duplication until the dedup catches it.
+
+**Hermes Agent** goes furthest in self-improvement — its [trajectory→RL training pipeline](https://github.com/NousResearch/hermes-agent) lets the agent fine-tune its own model from usage data. It also has a Mixture-of-Agents tool (4 frontier models in parallel) and a Skills Hub marketplace with security scanning. Enso doesn't modify model weights and has no marketplace.
+
+### What Enso Does That They Don't
+
+**1. Code-enforced learning (not optional)**
+
+Claude Code's Auto Memory, OpenClaw's Dreaming, and Hermes's skill creation are all **agent-initiated** — the model decides whether to remember. Enso's hooks are **code-enforced** — the agent literally cannot skip the capture/distill/inject loop. Our agent actually tried to modify its own safety hooks during a bug fix and got blocked by its own `core-readonly` hook.
+
+**2. Active forgetting with quality verification**
+
+All three major agents have memory that only grows (Claude Code silently truncates at 200 lines; Hermes skills accumulate; OpenClaw has no forgetting). Enso actively prunes: stale lessons decay after 37 days, LRU evicts beyond 50 entries, and weekly `enso-lint` checks for contradictions, orphans, and duplicates. A `deleted-lessons-tracker` flags when a deleted lesson's error recurs.
+
+**3. Immutable self-protection**
+
+None of the three agents prevent themselves from modifying their own rules. Enso's 3 immutable hooks are code-level constraints that cannot be overridden: physical verification (write→must read back), core read-only (agent can't modify hooks), and no-trace-no-truth (session-end audit).
+
+**4. Radical simplicity**
+
+1,267 lines of Shell + Python. No npm, no pip, no Docker, no database. The entire system is `grep`-searchable text files. You can read, edit, and understand every line. This is a deliberate trade-off: we sacrifice features (no multi-platform, no RL training, no context compression) for transparency and portability.
+
+### Where Enso Fits
+
+Enso is **not** a replacement for Claude Code, OpenClaw, or Hermes Agent. It's a **complementary layer** — a harness that wraps around your existing agent to add learning, forgetting, and self-protection.
+
+```
+Your Agent (Claude Code / OpenClaw / any)
+       ↕ every tool call passes through
+┌──────────────────────────────────────┐
+│           Enso Harness               │
+│  🔒 Can't skip  🧠 Learns  🗑️ Forgets │
+└──────────────────────────────────────┘
+```
+
+Currently optimized for Claude Code. Architecture is portable to any agent with lifecycle hooks.
 
 ## How It Works
 
@@ -80,8 +124,6 @@ Session 2:  Enso injects the lessons → Agent avoids the same mistake
 ```
 Error → Capture (code-enforced) → Distill (async) → Store → Inject next session → Avoid
 ```
-
-Not "the agent *chooses* to learn." The system **makes it** learn.
 
 ## Forgetting
 
@@ -179,6 +221,9 @@ Those store facts. Enso learns from mistakes — and forgets what's no longer us
 
 **Q: Do I need to configure anything after install?**
 No. `bash install.sh` registers all hooks. Next session, it starts learning.
+
+**Q: Why not just use Claude Code's built-in memory?**
+Claude Code's Auto Memory is great for storing facts. But it has a 200-line silent truncation limit, no learning from errors, no active forgetting, and no quality checks. Enso adds those missing layers on top.
 
 ## Contributing
 

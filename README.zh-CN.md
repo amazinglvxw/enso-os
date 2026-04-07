@@ -45,19 +45,53 @@ cd enso-os && bash install.sh
          你什么都不用做。系统自己学会了。
 ```
 
-## 为什么选 Enso？
+## Enso vs 三大 Agent
 
-<p align="center">
-  <img src="docs/assets/before-after.png" alt="有无 Enso 的区别" width="85%">
-</p>
+我们深入研究了 Claude Code、OpenClaw、Hermes Agent 的记忆和学习机制后构建了 Enso。以下是坦诚的对比——**他们比我们强的地方，以及我们有而他们没有的。**
 
-| 能力 | OpenHands (70K⭐) | Goose (34K⭐) | SWE-agent (19K⭐) | **Enso** |
+| 能力 | Claude Code | OpenClaw | Hermes (30K⭐) | **Enso** |
 |------|:-:|:-:|:-:|:-:|
-| 从错误中学习 | ❌ | ❌ | ❌ | ✅ |
-| 代码强制规则 | ❌ | 部分 | ❌ | ✅ |
-| 自进化记忆 | ❌ | ❌ | ❌ | ✅ |
-| 主动遗忘 | ❌ | ❌ | ❌ | ✅ |
-| 仅需 bash+python3 | ❌ | ❌ | ❌ | ✅ |
+| **从错误中学习** | ❌ | ❌ | ✅ 自动创建技能 | ✅ 代码强制 |
+| **主动遗忘** | 200行静默截断 | ❌ | ❌ 只增不减 | ✅ 衰减+LRU+检查 |
+| **上下文压缩** | ✅ 5层管线 | ✅ Compaction | ❌ | ❌ 依赖宿主Agent |
+| **睡眠整合** | ✅ AutoDream 4阶段 | ✅ Light→REM→Deep | ❌ | 部分(DIKW蒸馏) |
+| **自我保护** | ❌ Agent可改记忆 | ❌ | ❌ | ✅ 不可变Hook |
+| **知识质量检查** | ❌ | ❌ | ❌ | ✅ 每周Lint |
+| **代码量** | ~512K行 TS | ~50K行 | ~50K行 Python | **1267行** |
+| **依赖** | Node.js | Node.js+插件 | Python+RL框架 | **bash+python3** |
+
+### 他们比我们强的地方（坦诚说）
+
+**Claude Code** 有最强的上下文压缩——5层管线(工具结果预算→snip压缩→微压缩→上下文折叠→自动摘要)。Enso 不做上下文压缩，依赖 Claude Code 自身的。
+
+**OpenClaw** 有最优雅的记忆晋升——Dreaming 三阶段(Light→REM→Deep) + 6维加权评分。暂存区设计防止了记忆碎片化。Enso 的写入更激进，可能产生重复。
+
+**Hermes Agent** 自进化走得最远——使用轨迹 → RL 训练 → 微调模型。还有混合专家工具(4个前沿模型并行)和技能市场。Enso 不修改模型权重。
+
+### 我们有而他们没有的
+
+**1. 代码强制学习（不是可选的）** — 他们三个的学习都是 Agent 自主发起的（模型决定是否记住）。Enso 的 Hook 是代码强制的——Agent 物理上无法跳过。我们的 Agent 在修 bug 时试图修改自己的安全 Hook——被自己拦住了。
+
+**2. 主动遗忘 + 质量验证** — Claude Code 200行静默截断，Hermes 技能只增不减。Enso 主动修剪：37天衰减、50条LRU淘汰、每周 Lint 检查矛盾/孤岛/重复。
+
+**3. 不可变自我保护** — 没有一个主流 Agent 能阻止自己修改自己的规则。Enso 的 3 个不可变 Hook 是代码级约束。
+
+**4. 极致简单** — 1267行。不需要 npm、pip、Docker、数据库。全部是可 grep 搜索的文本文件。
+
+### Enso 的定位
+
+Enso **不是** Claude Code/OpenClaw/Hermes 的替代品。是**补充层**——包裹在你现有 Agent 外面，添加学习、遗忘和自我保护。
+
+```
+你的 Agent（Claude Code / OpenClaw / 任何）
+       ↕ 每次工具调用经过 Enso
+┌──────────────────────────────────────┐
+│           Enso Harness               │
+│  🔒 不能跳过  🧠 自动学习  🗑️ 主动遗忘  │
+└──────────────────────────────────────┘
+```
+
+当前针对 Claude Code 优化。架构可移植到任何支持生命周期 Hook 的 Agent。
 
 ## 怎么工作的
 
