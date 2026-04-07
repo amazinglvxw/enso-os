@@ -60,7 +60,9 @@ export ENSO_WISDOM_FILE="$ENSO_DIKW_DIR/wisdom.json"
 export ENSO_DIKW_UTILS="$ENSO_CORE/dikw-utils.py"
 
 [ -d "$ENSO_DIKW_DIR" ] || mkdir -p "$ENSO_DIKW_DIR"
-export ENSO_SESSION_LOADED_IDS="${TMPDIR:-/tmp}/enso-session-loaded-ids-$$"
+# Session ID: use PWD hash (not $$) so all hooks in same session share state
+ENSO_SESSION_HASH=$(echo "$PWD" | md5sum 2>/dev/null | awk '{print $1}' || echo "$PWD" | md5 -q 2>/dev/null || echo "default")
+export ENSO_SESSION_LOADED_IDS="${TMPDIR:-/tmp}/enso-session-${ENSO_SESSION_HASH}.ids"
 
 enso_dikw() {
     python3 "$ENSO_DIKW_UTILS" "$@"

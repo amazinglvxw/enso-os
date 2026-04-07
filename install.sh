@@ -4,15 +4,34 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-ENSO_VERSION="0.2.0"
+ENSO_VERSION="0.2.1"
 ENSO_DIR="$HOME/.enso"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 GITHUB_BASE="https://raw.githubusercontent.com/amazinglvxw/enso-os/main/harness"
 
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
+
+# ─── Prerequisites check ───
+MISSING=""
+command -v python3 &>/dev/null || MISSING="python3"
+command -v bash &>/dev/null || MISSING="${MISSING:+$MISSING, }bash"
+if [ -n "$MISSING" ]; then
+    echo -e "${RED}Error: Missing required tools: ${MISSING}${NC}" >&2
+    echo "Enso requires bash and python3 (usually pre-installed on macOS/Linux)." >&2
+    echo "Install python3: https://www.python.org/downloads/" >&2
+    exit 1
+fi
+
+# Check Python version (need 3.6+ for f-strings)
+PY_OK=$(python3 -c "import sys; print('OK' if sys.version_info >= (3, 6) else 'OLD')" 2>/dev/null || echo "FAIL")
+if [ "$PY_OK" != "OK" ]; then
+    echo -e "${RED}Error: Python 3.6+ required (found: $(python3 --version 2>&1))${NC}" >&2
+    exit 1
+fi
 
 # Cleanup trap for partial installs
 cleanup() { rm -rf "$ENSO_DIR/.download_tmp" 2>/dev/null || true; }
@@ -20,7 +39,7 @@ trap cleanup ERR EXIT
 
 echo ""
 echo -e "${CYAN}○ Enso v${ENSO_VERSION}${NC}"
-echo -e "${CYAN}  A Self-Evolving Harness for AI Agents${NC}"
+echo -e "${CYAN}  A Self-Evolving Harness for Claude Code${NC}"
 echo ""
 
 # ─── 1. Create directory structure ───

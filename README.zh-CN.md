@@ -6,7 +6,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
   <a href="#"><img src="https://img.shields.io/badge/代码量-1267行-brightgreen" alt="1267 LOC"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
-  <a href="#"><img src="https://img.shields.io/badge/依赖-零-blue" alt="Zero Deps"></a>
+  <a href="#"><img src="https://img.shields.io/badge/依赖-bash%20%2B%20python3-blue" alt="bash + python3"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 **你的 AI 助手犯了同一个错两次。Enso 确保没有第三次。**
 
-30 秒安装。零依赖。你的 Agent 自动开始学习。
+30 秒安装。只需 bash + python3（macOS/Linux 自带）。你的 Agent 自动开始学习。
 
 <p align="center">
   <img src="docs/assets/demo-flow.png" alt="Enso: Session 1 犯错 → Session 2 学会了" width="85%">
@@ -57,7 +57,7 @@ cd enso-os && bash install.sh
 | 代码强制规则 | ❌ | 部分 | ❌ | ✅ |
 | 自进化记忆 | ❌ | ❌ | ❌ | ✅ |
 | 主动遗忘 | ❌ | ❌ | ❌ | ✅ |
-| 零依赖 | ❌ | ❌ | ❌ | ✅ |
+| 仅需 bash+python3 | ❌ | ❌ | ❌ | ✅ |
 
 ## 怎么工作的
 
@@ -164,13 +164,16 @@ cd enso-os && bash install.sh
 ## FAQ
 
 **Q: 支持什么 AI Agent？**
-Claude Code（主要目标，全面测试）。任何支持生命周期 Hook 的 Agent。
+Claude Code（主要目标，全面测试，每日 dogfooding）。架构可移植到任何支持生命周期 Hook 的 Agent，但 install.sh 目前只配置 Claude Code。
 
 **Q: 数据存在哪？**
 100% 本地。`~/.enso/` 在你的机器上。无云、无 Docker、无数据库。
 
 **Q: 和 Mem0 / LangChain Memory 有什么区别？**
 它们存事实。Enso 从错误中学习——并遗忘不再有用的东西。
+
+**Q: 前提条件？**
+`bash` 和 `python3`（3.6+）。macOS 和大多数 Linux 发行版自带。不需要 pip、npm、Docker。
 
 **Q: 安装后需要配置什么？**
 不需要。`bash install.sh` 注册所有 Hook。下次会话自动开始学习。
