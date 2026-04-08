@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/代码量-1267行-brightgreen" alt="1267 LOC"></a>
+  <a href="#"><img src="https://img.shields.io/badge/代码量-1277行-brightgreen" alt="1277 LOC"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/依赖-bash%20%2B%20python3-blue" alt="bash + python3"></a>
 </p>
@@ -57,7 +57,7 @@ cd enso-os && bash install.sh
 | **睡眠整合** | ✅ AutoDream 4阶段 | ✅ Light→REM→Deep | ❌ | 部分(DIKW蒸馏) |
 | **自我保护** | ❌ Agent可改记忆 | ❌ | ❌ | ✅ 不可变Hook |
 | **知识质量检查** | ❌ | ❌ | ❌ | ✅ 每周Lint |
-| **代码量** | ~512K行 TS | ~50K行 | ~50K行 Python | **1267行** |
+| **代码量** | ~512K行 TS | ~50K行 | ~50K行 Python | **1277行** |
 | **依赖** | Node.js | Node.js+插件 | Python+RL框架 | **bash+python3** |
 
 ### 他们比我们强的地方（坦诚说）
@@ -76,7 +76,7 @@ cd enso-os && bash install.sh
 
 **3. 不可变自我保护** — 没有一个主流 Agent 能阻止自己修改自己的规则。Enso 的 3 个不可变 Hook 是代码级约束。
 
-**4. 极致简单** — 1267行。不需要 npm、pip、Docker、数据库。全部是可 grep 搜索的文本文件。
+**4. 极致简单** — 1277行。不需要 npm、pip、Docker、数据库。全部是可 grep 搜索的文本文件。
 
 ### Enso 的定位
 
