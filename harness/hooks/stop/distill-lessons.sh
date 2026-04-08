@@ -23,25 +23,33 @@ if [ -f "$ENSO_TRACE_FILE" ]; then
     CONTEXT=$(printf '%s\n\n=== RECENT TRACE (last 20) ===\n%s' "$CONTEXT" "$(tail -20 "$ENSO_TRACE_FILE")")
 fi
 
-# Distill via Claude CLI if available
+# Distill via Claude CLI if available (TIMEOUT enforced to prevent zombie accumulation)
 DISTILLED=""
+DISTILL_TIMEOUT="${ENSO_DISTILL_TIMEOUT:-60}"
 if command -v claude &>/dev/null; then
-    DISTILLED=$(printf '%s' "$CONTEXT" | claude --model claude-haiku-4-5 --print --max-turns 1 \
+    set +e
+    DISTILLED=$(timeout "$DISTILL_TIMEOUT" bash -c 'printf "%s" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 \
         "Extract 1-3 atomic lessons from these error seeds. Rules:
-- One lesson per line, starting with '- '
+- One lesson per line, starting with '\''- '\''
 - Under 30 words, actionable, specific
-- MERGE similar errors into ONE lesson (don't repeat)
+- MERGE similar errors into ONE lesson (don'\''t repeat)
 - If errors are trivial/transient (exit codes, temp failures), output NOTHING
 - Before EACH lesson, output a category line: CATEGORY: kebab-case-tag
   Reuse: browser-dom-safety, file-io, timeout-recovery, cli-safety, git-ops, api-usage, memory-mgmt
-- Bad: '- Exit code 1' (symptom not lesson)
-- Good: '- Use offset/limit when reading files over 5000 lines to avoid token overflow'
-Only output lessons + categories. No preamble." 2>/dev/null) || true
+- Bad: '\''- Exit code 1'\'' (symptom not lesson)
+- Good: '\''- Use offset/limit when reading files over 5000 lines to avoid token overflow'\''
+Only output lessons + categories. No preamble." 2>/dev/null' _ "$CONTEXT")
+    DISTILL_EXIT=$?
+    set -e
+    if [ "$DISTILL_EXIT" -eq 124 ]; then
+        echo "⏰ [enso] Distillation timed out after ${DISTILL_TIMEOUT}s, using fallback" >&2
+        DISTILLED=""
+    fi
 fi
 
 # Fallback: skip if no CLI (raw errors are NOT lessons)
 if [ -z "$DISTILLED" ]; then
-    echo "⚠️  [enso] Claude CLI unavailable, skipping distillation (raw errors are not lessons)" >&2
+    echo "⚠️  [enso] Claude CLI unavailable or timed out, skipping distillation" >&2
     > "$ENSO_ERROR_SEEDS"
     exit 0
 fi

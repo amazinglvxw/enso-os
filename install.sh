@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════
-# Enso Installer v0.2.0
+# Enso Installer v0.3.0
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-ENSO_VERSION="0.2.1"
+ENSO_VERSION="0.3.0"
 ENSO_DIR="$HOME/.enso"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 GITHUB_BASE="https://raw.githubusercontent.com/amazinglvxw/enso-os/main/harness"
