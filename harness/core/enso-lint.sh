@@ -6,7 +6,7 @@ source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 
 REPORT="$ENSO_TRACES_DIR/lint-report-$ENSO_TODAY.md"
 
-# Single Python call for all checks (fixes pipe-subshell counter bug + shell injection)
+# Single Python call — use format() instead of f-strings to avoid {curly brace} in lesson text
 ENSO_LESSONS_FILE_EV="$ENSO_LESSONS_FILE" python3 -c '
 import re, sys, os
 from datetime import datetime, timedelta
@@ -42,16 +42,16 @@ for i in range(len(lessons)):
         if not w1 or not w2: continue
         overlap = len(w1 & w2) / min(len(w1), len(w2))
         if overlap >= 0.6:
-            dups.append(f"[{overlap:.0%}] \"{lessons[i][\"text\"][:60]}\" <> \"{lessons[j][\"text\"][:60]}\"")
+            dups.append("[{:.0%}] {} <> {}".format(overlap, lessons[i]["text"][:60], lessons[j]["text"][:60]))
 weak = [l for l in lessons if not (set(re.findall(r"[a-z]+", l["text"].lower())) & action_verbs)]
 
-print(f"TOTAL_LESSONS:{len(lessons)}")
-print(f"ORPHANS:{len(orphans)}")
-for o in orphans: print(f"  ORPHAN:{o[\"raw\"]}")
-print(f"DUPS:{len(dups)}")
-for d in dups: print(f"  DUP:{d}")
-print(f"WEAK:{len(weak)}")
-for w in weak: print(f"  WEAK:{w[\"raw\"]}")
+print("TOTAL_LESSONS:{}".format(len(lessons)))
+print("ORPHANS:{}".format(len(orphans)))
+for o in orphans: print("  ORPHAN:{}".format(o["raw"]))
+print("DUPS:{}".format(len(dups)))
+for d in dups: print("  DUP:{}".format(d))
+print("WEAK:{}".format(len(weak)))
+for w in weak: print("  WEAK:{}".format(w["raw"]))
 ' 2>/dev/null > /tmp/enso-lint-output.txt || echo "TOTAL_LESSONS:0" > /tmp/enso-lint-output.txt
 
 TOTAL_LESSONS=$(grep "^TOTAL_LESSONS:" /tmp/enso-lint-output.txt | cut -d: -f2)
