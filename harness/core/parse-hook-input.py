@@ -21,14 +21,18 @@ ERROR_KEYWORDS = frozenset([
 FILE_PATH_KEYS = ("file_path", "path", "filename", "command")
 
 
+_SENTINEL = object()
+
 def _get_nested(d, *keys, default=""):
-    """Safely traverse nested dicts."""
+    """Safely traverse nested dicts. Preserves falsy values (False, 0, '')."""
     for key in keys:
         if isinstance(d, dict):
-            d = d.get(key, {})
+            d = d.get(key, _SENTINEL)
+            if d is _SENTINEL:
+                return default
         else:
             return default
-    return d if d and d != {} else default
+    return default if d is _SENTINEL or (isinstance(d, dict) and not d) else d
 
 
 def _detect_error(content):

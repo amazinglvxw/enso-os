@@ -5,13 +5,24 @@
 # Supported targets: claude-code, gemini-cli, hermes, openclaw, generic
 # ═══════════════════════════════════════════════════════════════
 
-# Read target from config, default to claude-code (backward compat)
-if [ -f "$ENSO_DIR/.target" ]; then
-    ENSO_TARGET=$(cat "$ENSO_DIR/.target" | tr -d '[:space:]')
-fi
-export ENSO_TARGET="${ENSO_TARGET:-claude-code}"
+ENSO_VALID_TARGETS="claude-code gemini-cli hermes openclaw generic"
 
-# ─── Output format: lessons/knowledge/wisdom ───
+# Read target (skip if already exported — avoids re-reading .target on every hook)
+if [ -z "${ENSO_TARGET:-}" ]; then
+    if [ -f "$ENSO_DIR/.target" ]; then
+        ENSO_TARGET=$(tr -d '[:space:]' < "$ENSO_DIR/.target")
+    fi
+    ENSO_TARGET="${ENSO_TARGET:-claude-code}"
+    # Validate — fall back to claude-code on unknown value
+    case " $ENSO_VALID_TARGETS " in
+        *" $ENSO_TARGET "*) ;;
+        *) echo "⚠️  [enso] Unknown target '$ENSO_TARGET', falling back to claude-code" >&2
+           ENSO_TARGET="claude-code" ;;
+    esac
+fi
+export ENSO_TARGET
+
+# Output format: lessons/knowledge/wisdom
 enso_adapter_output_lessons() {
     local count="$1" content="$2" tag="${3:-enso-lessons}"
     case "$ENSO_TARGET" in
@@ -24,11 +35,10 @@ enso_adapter_output_lessons() {
     esac
 }
 
-# ─── Distillation LLM backend ───
+# Distillation LLM backend (tries claude → llm → openai → skip)
 enso_adapter_distill() {
     local context="$1" timeout_s="${2:-60}" prompt="$3"
     local result=""
-    # Try backends in order: claude → llm → openai → skip
     if command -v claude &>/dev/null; then
         result=$(timeout "$timeout_s" bash -c \
             'printf "%s" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 "$2" 2>/dev/null' \

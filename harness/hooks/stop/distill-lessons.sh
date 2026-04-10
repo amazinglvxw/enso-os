@@ -23,9 +23,6 @@ if [ -f "$ENSO_TRACE_FILE" ]; then
     CONTEXT=$(printf '%s\n\n=== RECENT TRACE (last 20) ===\n%s' "$CONTEXT" "$(tail -20 "$ENSO_TRACE_FILE")")
 fi
 
-# Seed hash for provenance tracking
-SEED_HASH=$(printf '%s' "$CONTEXT" | md5sum 2>/dev/null | cut -c1-6 || printf '%s' "$CONTEXT" | md5 -q 2>/dev/null | cut -c1-6 || echo "000000")
-
 # Distill via adapter (tries claude → llm → openai → skip)
 DISTILL_TIMEOUT="${ENSO_DISTILL_TIMEOUT:-60}"
 DISTILL_PROMPT="Extract 1-3 atomic lessons from these error seeds. Rules:
@@ -48,6 +45,9 @@ if [ -z "$DISTILLED" ]; then
     > "$ENSO_ERROR_SEEDS"
     exit 0
 fi
+
+# Seed hash for provenance tracking (computed only when distillation succeeds)
+SEED_HASH=$(printf '%s' "$CONTEXT" | md5sum 2>/dev/null | cut -c1-6 || printf '%s' "$CONTEXT" | md5 -q 2>/dev/null | cut -c1-6 || echo "000000")
 
 # Initialize lessons file if needed
 if [ ! -f "$ENSO_LESSONS_FILE" ]; then
@@ -107,19 +107,14 @@ print('NEW')
             else
                 CATEGORY=$(python3 "$ENSO_DIKW_UTILS" categorize --text "$LESSON_TEXT" 2>/dev/null || echo "uncategorized")
             fi
-            APPLIES_ARG=""
+            DIKW_ARGS=(--info-file "$ENSO_INFO_FILE" --text "$LESSON_TEXT"
+                --category "$CATEGORY" --ts "$(enso_ts)"
+                --source-errors "$ERROR_COUNT" --seed-hash "$SEED_HASH")
             if [ -n "${NEXT_APPLIES:-}" ]; then
-                APPLIES_ARG="--applies-when $NEXT_APPLIES"
+                DIKW_ARGS+=(--applies-when "$NEXT_APPLIES")
                 NEXT_APPLIES=""
             fi
-            python3 "$ENSO_DIKW_UTILS" append_info \
-                --info-file "$ENSO_INFO_FILE" \
-                --text "$LESSON_TEXT" \
-                --category "$CATEGORY" \
-                --ts "$(enso_ts)" \
-                --source-errors "$ERROR_COUNT" \
-                --seed-hash "$SEED_HASH" \
-                $APPLIES_ARG 2>/dev/null || true
+            python3 "$ENSO_DIKW_UTILS" append_info "${DIKW_ARGS[@]}" 2>/dev/null || true
         fi
         NEW_COUNT=$((NEW_COUNT + 1))
     fi
