@@ -1,30 +1,64 @@
 #!/usr/bin/env bash
 # Enso Session Start: Load Learned Lessons (SessionStart)
-# Injects active lessons + prediction accuracy into agent context.
+# Injects active lessons into agent context. Detects newly learned
+# lessons and prompts the agent to proactively tell the user.
 set -euo pipefail
 
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
+
+LAST_LOAD_TS_FILE="$ENSO_DIR/.last-load-ts"
 
 # Load active lessons (skip stale)
 ACTIVE=""
 LESSON_COUNT=0
 if [ -f "$ENSO_LESSONS_FILE" ]; then
     ACTIVE=$(grep "^- " "$ENSO_LESSONS_FILE" | grep -v "\[stale\]" || true)
-    LESSON_COUNT=0
     if [ -n "$ACTIVE" ]; then
-        LESSON_COUNT=$(printf '%s\n' "$ACTIVE" | grep -c "^- " 2>/dev/null || echo "0")
+        LESSON_COUNT=$(printf '%s\n' "$ACTIVE" | wc -l | tr -d ' ')
     fi
 fi
 
 # Count sessions
 SESSION_COUNT=$(find "$ENSO_TRACES_DIR" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
 
-# Output
+# ─── Detect newly learned lessons (since last session load) ───
+NEW_LESSONS=""
+NEW_COUNT=0
+if [ -f "$LAST_LOAD_TS_FILE" ] && [ "$LESSON_COUNT" -gt 0 ]; then
+    LAST_TS=$(cat "$LAST_LOAD_TS_FILE" 2>/dev/null | tr -d '[:space:]')
+    if [ -n "$LAST_TS" ]; then
+        # Lessons with date > last load date are "new"
+        NEW_LESSONS=$(printf '%s\n' "$ACTIVE" | while IFS= read -r line; do
+            LDATE=$(echo "$line" | grep -oP '^\- \[\K\d{4}-\d{2}-\d{2}' 2>/dev/null || echo "$line" | sed -n 's/^- \[\([0-9-]*\)\].*/\1/p')
+            [ -n "$LDATE" ] && [ "$LDATE" \> "$LAST_TS" ] && echo "$line"
+        done || true)
+        [ -n "$NEW_LESSONS" ] && NEW_COUNT=$(printf '%s\n' "$NEW_LESSONS" | wc -l | tr -d ' ')
+    fi
+fi
+
+# Record this load timestamp for next session comparison
+echo "$ENSO_TODAY" > "$LAST_LOAD_TS_FILE"
+
+# ─── Output ───
 if [ "$LESSON_COUNT" -gt 0 ]; then
     echo "OK: Enso loaded ($SESSION_COUNT sessions, $LESSON_COUNT active lessons)"
     echo ""
     enso_adapter_output_lessons "$LESSON_COUNT" "$ACTIVE" "enso-lessons"
+
+    # If there are newly learned lessons, prompt the agent to tell the user
+    if [ "$NEW_COUNT" -gt 0 ]; then
+        STRIPPED=$(printf '%s\n' "$NEW_LESSONS" | sed 's/^- \[[0-9-]*\] \[hits:[0-9]*\] \(\[seed:[a-f0-9]*\] \)\?/- /')
+        echo ""
+        echo "<enso-newly-learned count=\"$NEW_COUNT\">"
+        echo "The following lessons were learned from errors in recent sessions."
+        echo "Find a natural moment to briefly tell the user what you learned — not as a dump,"
+        echo "but as a short, conversational mention (e.g., \"By the way, I learned from last time"
+        echo "that...\" or \"上次我学到了...\"). One sentence per lesson is enough."
+        echo ""
+        echo "$STRIPPED"
+        echo "</enso-newly-learned>"
+    fi
 else
     echo "OK: Enso ready ($SESSION_COUNT sessions, no lessons yet)"
 fi
