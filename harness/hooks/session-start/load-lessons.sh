@@ -24,7 +24,7 @@ SESSION_COUNT=$(find "$ENSO_TRACES_DIR" -name "*.jsonl" 2>/dev/null | wc -l | tr
 if [ "$LESSON_COUNT" -gt 0 ]; then
     echo "OK: Enso loaded ($SESSION_COUNT sessions, $LESSON_COUNT active lessons)"
     echo ""
-    printf '<enso-lessons count="%s">\n%s\n</enso-lessons>\n' "$LESSON_COUNT" "$ACTIVE"
+    enso_adapter_output_lessons "$LESSON_COUNT" "$ACTIVE" "enso-lessons"
 else
     echo "OK: Enso ready ($SESSION_COUNT sessions, no lessons yet)"
 fi
@@ -42,7 +42,10 @@ if os.path.exists(kf):
 " 2>/dev/null || true)
     K_COUNT=0
     [ -n "$K_RULES" ] && K_COUNT=$(echo "$K_RULES" | grep -c "^- " 2>/dev/null || echo "0")
-    [ "$K_COUNT" -gt 0 ] && printf '\n<enso-knowledge count="%s">\n%s\n</enso-knowledge>\n' "$K_COUNT" "$K_RULES"
+    if [ "$K_COUNT" -gt 0 ]; then
+        echo ""
+        enso_adapter_output_lessons "$K_COUNT" "$K_RULES" "enso-knowledge"
+    fi
 fi
 
 # ─── DIKW: Load Wisdom layer ───
@@ -56,7 +59,10 @@ if os.path.exists(wf):
 " 2>/dev/null || true)
     W_COUNT=0
     [ -n "$W_RULES" ] && W_COUNT=$(echo "$W_RULES" | grep -c "^- " 2>/dev/null || echo "0")
-    [ "$W_COUNT" -gt 0 ] && printf '\n<enso-wisdom count="%s">\n%s\n</enso-wisdom>\n' "$W_COUNT" "$W_RULES"
+    if [ "$W_COUNT" -gt 0 ]; then
+        echo ""
+        enso_adapter_output_lessons "$W_COUNT" "$W_RULES" "enso-wisdom"
+    fi
 fi
 
 # ─── DIKW: Record loaded IDs for utility tracking ───

@@ -111,7 +111,7 @@ def write_lessons(path, header, lessons):
 
 def extract_lesson_text(line):
     """Strip date/hits prefix from lesson line."""
-    return re.sub(r"^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*", "", line.strip())
+    return re.sub(r"^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?", "", line.strip())
 
 # ── Subcommands ─────────────────────────────────────────────────
 
@@ -246,6 +246,8 @@ def cmd_append_info(args):
         "text": args.text,
         "category": args.category,
         "source_errors": args.source_errors,
+        "seed_hash": getattr(args, "seed_hash", ""),
+        "applies_when": getattr(args, "applies_when", ""),
         "hits": 0, "miss_streak": 0, "status": "active"
     }
     entries = read_jsonl(args.info_file)
@@ -308,6 +310,8 @@ def main():
     s7.add_argument("--category", required=True)
     s7.add_argument("--ts", required=True)
     s7.add_argument("--source-errors", type=int, required=True)
+    s7.add_argument("--seed-hash", default="")
+    s7.add_argument("--applies-when", default="")
 
     s6 = sub.add_parser("sync_active_md")
     s6.add_argument("--info-file", required=True)

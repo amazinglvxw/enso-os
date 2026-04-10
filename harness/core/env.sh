@@ -19,13 +19,16 @@ export ENSO_PARSER="$ENSO_CORE/parse-hook-input.py"
 [ -d "$ENSO_TRACES_DIR" ] || mkdir -p "$ENSO_TRACES_DIR"
 [ -d "$ENSO_LESSONS_DIR" ] || mkdir -p "$ENSO_LESSONS_DIR"
 
+# Load framework adapter (target detection + output format + distill backend)
+source "$ENSO_CORE/adapter.sh"
+
 # Shared: generate ISO 8601 UTC timestamp
 enso_ts() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 
 # Shared: parse hook input (single Python call for all fields)
 # Usage: read -r FIELD1 FIELD2 <<< $(enso_parse tool_name file_path)
 enso_parse() {
-    echo "$ENSO_INPUT" | python3 "$ENSO_PARSER" "$@"
+    echo "$ENSO_INPUT" | python3 "$ENSO_PARSER" --format "$ENSO_TARGET" "$@"
 }
 
 # Shared: write JSON trace span (safe — uses Python for escaping)

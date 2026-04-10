@@ -18,7 +18,7 @@ with open(lessons_file) as f:
         if not line.startswith("- ") or "[stale]" in line:
             continue
         # Extract date, hits, text
-        m = re.match(r"^- \[(\d{4}-\d{2}-\d{2})\] \[hits:(\d+)\] (.+)", line.strip())
+        m = re.match(r"^- \[(\d{4}-\d{2}-\d{2})\] \[hits:(\d+)\] (?:\[seed:[a-f0-9]+\] )?(.+)", line.strip())
         if m:
             date, hits, text = m.group(1), int(m.group(2)), m.group(3)
             # Extract category if present [category] prefix
