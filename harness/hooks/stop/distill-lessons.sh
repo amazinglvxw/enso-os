@@ -23,33 +23,28 @@ if [ -f "$ENSO_TRACE_FILE" ]; then
     CONTEXT=$(printf '%s\n\n=== RECENT TRACE (last 20) ===\n%s' "$CONTEXT" "$(tail -20 "$ENSO_TRACE_FILE")")
 fi
 
-# Distill via Claude CLI if available (TIMEOUT enforced to prevent zombie accumulation)
-DISTILLED=""
+# Seed hash for provenance tracking
+SEED_HASH=$(printf '%s' "$CONTEXT" | md5sum 2>/dev/null | cut -c1-6 || printf '%s' "$CONTEXT" | md5 -q 2>/dev/null | cut -c1-6 || echo "000000")
+
+# Distill via adapter (tries claude → llm → openai → skip)
 DISTILL_TIMEOUT="${ENSO_DISTILL_TIMEOUT:-60}"
-if command -v claude &>/dev/null; then
-    set +e
-    DISTILLED=$(timeout "$DISTILL_TIMEOUT" bash -c 'printf "%s" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 \
-        "Extract 1-3 atomic lessons from these error seeds. Rules:
-- One lesson per line, starting with '\''- '\''
+DISTILL_PROMPT="Extract 1-3 atomic lessons from these error seeds. Rules:
+- One lesson per line, starting with '- '
 - Under 30 words, actionable, specific
-- MERGE similar errors into ONE lesson (don'\''t repeat)
+- MERGE similar errors into ONE lesson (don't repeat)
 - If errors are trivial/transient (exit codes, temp failures), output NOTHING
 - Before EACH lesson, output a category line: CATEGORY: kebab-case-tag
   Reuse: browser-dom-safety, file-io, timeout-recovery, cli-safety, git-ops, api-usage, memory-mgmt
-- Bad: '\''- Exit code 1'\'' (symptom not lesson)
-- Good: '\''- Use offset/limit when reading files over 5000 lines to avoid token overflow'\''
-Only output lessons + categories. No preamble." 2>/dev/null' _ "$CONTEXT")
-    DISTILL_EXIT=$?
-    set -e
-    if [ "$DISTILL_EXIT" -eq 124 ]; then
-        echo "⏰ [enso] Distillation timed out after ${DISTILL_TIMEOUT}s, using fallback" >&2
-        DISTILLED=""
-    fi
-fi
+- After EACH category, output: APPLIES_WHEN: brief context (e.g., reading large files, running git commands)
+- Bad: '- Exit code 1' (symptom not lesson)
+- Good: '- Use offset/limit when reading files over 5000 lines to avoid token overflow'
+Only output lessons + categories + applies_when. No preamble."
 
-# Fallback: skip if no CLI (raw errors are NOT lessons)
+DISTILLED=$(enso_adapter_distill "$CONTEXT" "$DISTILL_TIMEOUT" "$DISTILL_PROMPT")
+
+# Fallback: skip if no LLM available (raw errors are NOT lessons)
 if [ -z "$DISTILLED" ]; then
-    echo "⚠️  [enso] Claude CLI unavailable or timed out, skipping distillation" >&2
+    echo "⚠️  [enso] No LLM backend available, skipping distillation" >&2
     > "$ENSO_ERROR_SEEDS"
     exit 0
 fi
@@ -62,11 +57,13 @@ fi
 # Append with SEMANTIC deduplication (not just exact match)
 NEW_COUNT=0
 NEXT_CATEGORY=""
+NEXT_APPLIES=""
 while IFS= read -r lesson; do
     [ -z "$lesson" ] && continue
-    # Capture CATEGORY line from LLM output
+    # Capture CATEGORY and APPLIES_WHEN lines from LLM output
     case "$lesson" in
         CATEGORY:*) NEXT_CATEGORY="${lesson#CATEGORY: }"; NEXT_CATEGORY="${NEXT_CATEGORY# }"; continue ;;
+        APPLIES_WHEN:*) NEXT_APPLIES="${lesson#APPLIES_WHEN: }"; NEXT_APPLIES="${NEXT_APPLIES# }"; continue ;;
     esac
     case "$lesson" in -\ *) ;; *) continue ;; esac
 
@@ -90,7 +87,7 @@ try:
     with open(sys.argv[2], 'r') as f:
         for line in f:
             if not line.startswith('- '): continue
-            text = re.sub(r'\[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*', '', line[2:]).lower()
+            text = re.sub(r'\[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(\[seed:[a-f0-9]+\]\s*)?', '', line[2:]).lower()
             existing_words = set(w for w in re.findall(r'[a-z]{3,}', text) if w not in stops)
             if new_words and len(new_words & existing_words) / len(new_words) >= 0.6:
                 print('DUP'); sys.exit(0)
@@ -100,7 +97,7 @@ print('NEW')
     fi
 
     if [ "$IS_DUP" = "NEW" ]; then
-        echo "- [$ENSO_TODAY] [hits:0] $LESSON_TEXT" >> "$ENSO_LESSONS_FILE"
+        echo "- [$ENSO_TODAY] [hits:0] [seed:$SEED_HASH] $LESSON_TEXT" >> "$ENSO_LESSONS_FILE"
         # DIKW I-layer: dual write to info-layer.jsonl
         if [ -f "${ENSO_DIKW_UTILS:-}" ] && [ -n "${ENSO_INFO_FILE:-}" ]; then
             CATEGORY=""
@@ -110,12 +107,19 @@ print('NEW')
             else
                 CATEGORY=$(python3 "$ENSO_DIKW_UTILS" categorize --text "$LESSON_TEXT" 2>/dev/null || echo "uncategorized")
             fi
+            APPLIES_ARG=""
+            if [ -n "${NEXT_APPLIES:-}" ]; then
+                APPLIES_ARG="--applies-when $NEXT_APPLIES"
+                NEXT_APPLIES=""
+            fi
             python3 "$ENSO_DIKW_UTILS" append_info \
                 --info-file "$ENSO_INFO_FILE" \
                 --text "$LESSON_TEXT" \
                 --category "$CATEGORY" \
                 --ts "$(enso_ts)" \
-                --source-errors "$ERROR_COUNT" 2>/dev/null || true
+                --source-errors "$ERROR_COUNT" \
+                --seed-hash "$SEED_HASH" \
+                $APPLIES_ARG 2>/dev/null || true
         fi
         NEW_COUNT=$((NEW_COUNT + 1))
     fi
@@ -161,4 +165,4 @@ ENSO_LESSONS_FILE="$ENSO_LESSONS_FILE" python3 "$ENSO_CORE/rebuild-index.py" 2>/
 
 # Write trace event
 enso_trace "ts" "$(enso_ts)" "span_type" "distillation" \
-    "error_seeds" "$ERROR_COUNT" "lessons_added" "$NEW_COUNT"
+    "error_seeds" "$ERROR_COUNT" "lessons_added" "$NEW_COUNT" "seed_hash" "$SEED_HASH"

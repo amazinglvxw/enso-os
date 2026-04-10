@@ -7,6 +7,38 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 - MINOR: New features, new hooks, new mechanisms
 - PATCH: Bug fixes, docs updates, performance improvements
 
+## [0.4.0] — 2026-04-10
+
+### Repositioned
+- **"Discipline Plugin for AI Agents"** — from competitive "harness vs" framing to complementary plugin positioning
+- New tagline: "Enso is not a memory system. It's a discipline system."
+- README rewritten with "Works With" framing instead of "vs The Big Three"
+
+### Added
+- **Multi-framework support** (`install.sh --target`):
+  - `claude-code` (default, unchanged behavior)
+  - `gemini-cli` (auto-registers in `~/.gemini/settings.json`)
+  - `hermes` (generates Python plugin shim at `~/.hermes/plugins/enso/`)
+  - `openclaw` (generates TypeScript hook at `~/.openclaw/hooks/enso-discipline/`)
+  - `generic` (installs hooks only, prints manual integration guide)
+- **Framework adapter layer** (`adapter.sh`): centralizes output format + LLM backend selection
+- **Multi-format input parser** (`parse-hook-input.py --format`): supports claude-code, gemini-cli, hermes, openclaw, generic JSON schemas
+- **Lesson provenance** (`[seed:XXXXXX]`): hash tracks which error seeds generated each lesson
+- **`applies_when` tags**: context-aware lesson metadata (e.g., "reading large files", "running git commands")
+- **Multi-backend distillation**: tries claude → llm → openai CLI, graceful fallback
+
+### Changed
+- `install.sh`: backward-compatible (no args = claude-code), new `--target` flag
+- `env.sh`: sources adapter.sh, passes `--format` to parser
+- `load-lessons.sh`: uses adapter for output format (XML for Claude/Gemini, Markdown for others)
+- `distill-lessons.sh`: uses adapter for LLM backend, adds provenance hash + applies_when to prompt
+- Version: 0.3.0 → 0.4.0
+- LOC: 1277 → 1401 (Shell 801 + Python 600)
+
+### Backward Compatibility
+- All existing Claude Code users: zero behavioral change
+- `bash install.sh` with no arguments works identically to v0.3.0
+
 ## [0.3.0] — 2026-04-09
 
 ### Added
