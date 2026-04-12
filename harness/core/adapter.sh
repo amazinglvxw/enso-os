@@ -36,22 +36,45 @@ enso_adapter_output_lessons() {
     esac
 }
 
-# Distillation LLM backend (tries claude → llm → openai → skip)
+# Portable timeout: tries timeout → gtimeout (Homebrew) → python3 fallback
+_enso_timeout() {
+    local secs="$1"; shift
+    if command -v timeout &>/dev/null; then
+        timeout "$secs" "$@"
+    elif command -v gtimeout &>/dev/null; then
+        gtimeout "$secs" "$@"
+    else
+        python3 -c "
+import subprocess, sys
+try:
+    r = subprocess.run(sys.argv[2:], timeout=int(sys.argv[1]), capture_output=False)
+    sys.exit(r.returncode)
+except subprocess.TimeoutExpired:
+    sys.exit(124)
+" "$secs" "$@"
+    fi
+}
+
+# Distillation LLM backend (tries claude → llm → openai → fail)
 enso_adapter_distill() {
     local context="$1" timeout_s="${2:-60}" prompt="$3"
-    local result=""
-    if command -v claude &>/dev/null; then
-        result=$(timeout "$timeout_s" bash -c \
-            'printf "%s\n\n%s" "$2" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 2>/dev/null' \
-            _ "$context" "$prompt") || true
-    elif command -v llm &>/dev/null; then
-        result=$(timeout "$timeout_s" bash -c \
-            'printf "%s\n\n%s" "$2" "$1" | llm -m haiku 2>/dev/null' \
-            _ "$context" "$prompt") || true
-    elif command -v openai &>/dev/null; then
-        result=$(timeout "$timeout_s" bash -c \
-            'printf "%s\n\n%s" "$2" "$1" | openai chat -m gpt-4o-mini 2>/dev/null' \
-            _ "$context" "$prompt") || true
-    fi
-    echo "$result"
+    local -a backends=(
+        "claude:--model claude-haiku-4-5 --print --max-turns 1"
+        "llm:-m haiku"
+        "openai:chat -m gpt-4o-mini"
+    )
+    for entry in "${backends[@]}"; do
+        local cmd="${entry%%:*}"
+        local args="${entry#*:}"
+        if command -v "$cmd" &>/dev/null; then
+            local result
+            result=$(_enso_timeout "$timeout_s" bash -c \
+                'printf "%s\n\n%s" "$2" "$1" | '"$cmd $args"' 2>/dev/null' \
+                _ "$context" "$prompt") && {
+                echo "$result"
+                return 0
+            }
+        fi
+    done
+    return 1
 }
