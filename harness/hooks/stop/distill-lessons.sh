@@ -54,6 +54,17 @@ if [ ! -f "$ENSO_LESSONS_FILE" ]; then
     printf '# Enso Active Lessons\n# Format: - [YYYY-MM-DD] [hits:N] lesson text\n\n' > "$ENSO_LESSONS_FILE"
 fi
 
+# Pre-load existing lesson texts for O(N) fallback dedup (instead of O(N*M) re-reading)
+EXISTING_LESSON_TEXTS=""
+if [ -f "$ENSO_LESSONS_FILE" ]; then
+    EXISTING_LESSON_TEXTS=$(grep "^- " "$ENSO_LESSONS_FILE" | python3 -c "
+import re, sys
+for line in sys.stdin:
+    text = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '', line.strip())
+    print(text.lower())
+" 2>/dev/null || true)
+fi
+
 # Append with SEMANTIC deduplication (not just exact match)
 NEW_COUNT=0
 NEXT_CATEGORY=""
@@ -77,23 +88,20 @@ while IFS= read -r lesson; do
             --info-file "${ENSO_INFO_FILE:-/dev/null}" \
             --threshold 0.7 2>/dev/null || echo "NEW")
     else
-        # Fallback: original keyword overlap
+        # Fallback: keyword overlap using pre-loaded lesson texts (O(1) per candidate)
         IS_DUP=$(python3 -c "
 import re, sys
 new_lesson = sys.argv[1].lower()
 stops = {'the','and','for','that','this','with','from','have','will','been','when','before','after','always','instead','using','avoid','use'}
 new_words = set(w for w in re.findall(r'[a-z]{3,}', new_lesson) if w not in stops)
-try:
-    with open(sys.argv[2], 'r') as f:
-        for line in f:
-            if not line.startswith('- '): continue
-            text = re.sub(r'\[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(\[seed:[a-f0-9]+\]\s*)?', '', line[2:]).lower()
-            existing_words = set(w for w in re.findall(r'[a-z]{3,}', text) if w not in stops)
-            if new_words and len(new_words & existing_words) / len(new_words) >= 0.6:
-                print('DUP'); sys.exit(0)
-except FileNotFoundError: pass
+for line in sys.stdin:
+    text = line.strip()
+    if not text: continue
+    existing_words = set(w for w in re.findall(r'[a-z]{3,}', text) if w not in stops)
+    if new_words and len(new_words & existing_words) / len(new_words) >= 0.6:
+        print('DUP'); sys.exit(0)
 print('NEW')
-" "$LESSON_TEXT" "$ENSO_LESSONS_FILE" 2>/dev/null || echo "NEW")
+" "$LESSON_TEXT" <<< "$EXISTING_LESSON_TEXTS" 2>/dev/null || echo "NEW")
     fi
 
     if [ "$IS_DUP" = "NEW" ]; then
