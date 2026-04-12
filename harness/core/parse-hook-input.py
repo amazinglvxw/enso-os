@@ -87,7 +87,7 @@ def extract(data, field, fmt="claude-code"):
         else:
             params = data.get("tool_input", data.get("arguments", data.get("context", {})))
         if isinstance(params, dict):
-            for key in FILE_PATH_KEYS + ("workspaceDir", "file", "target"):
+            for key in ("file", "target") + FILE_PATH_KEYS + ("workspaceDir",):
                 if key in params:
                     return str(params[key])[:200]
         return ""

@@ -118,6 +118,9 @@ print('NEW')
         fi
         NEW_COUNT=$((NEW_COUNT + 1))
     fi
+    # Clear metadata for next lesson (prevents bleed-through on DUP)
+    NEXT_CATEGORY=""
+    NEXT_APPLIES=""
 done <<< "$DISTILLED"
 
 [ "$NEW_COUNT" -gt 0 ] && echo "📝 [enso] Distilled $NEW_COUNT lesson(s)" >&2
