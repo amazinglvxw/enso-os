@@ -18,3 +18,12 @@ memory/data/
 .idea/
 .vscode/
 *.code-workspace
+
+# Runtime artifacts
+memory/execution-log.jsonl
+memory/*.jsonl
+*.lock
+.last-load-ts
+.announced-lessons
+.error_seeds
+.pending_verifications

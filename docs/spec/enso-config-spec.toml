@@ -1,5 +1,4 @@
-# Enso Configuration
-# STATUS: This file is NOT yet read by the system (roadmap item).
+# Enso Configuration Specification (ROADMAP — not yet read by the system)
 # Currently, all values are hardcoded in the hook scripts.
 # This file documents the intended configuration schema for future use.
 
