@@ -15,8 +15,9 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: harness/
-          severity: warning
+          severity: error
           additional_files: install.sh
+
 
   pytest:
     runs-on: ubuntu-latest
@@ -25,6 +26,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install pytest
+        run: pip install pytest
       - name: Run tests
         run: python3 -m pytest tests/test_parse_input.py -v --tb=short
 
