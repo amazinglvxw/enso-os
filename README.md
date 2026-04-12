@@ -72,17 +72,27 @@ Enso is a plugin, not a platform. It adds discipline to your existing agent with
 | Immutable self-protection (3 hooks) | Platform integrations |
 | Knowledge quality checks (weekly lint) | Tool execution |
 
+| What Enso enforces (blocks violations) | What Enso audits (logs + warns) |
+|----------------------------------------|---------------------------------|
+| Self-protection: agent can't modify its own hooks | Write verification: tracks unverified writes |
+| Safety scan: blocks secrets/injection in memory files | Memory budget: warns when MEMORY.md is too large |
+
 Enso doesn't replace your agent. It makes it more disciplined. Like SELinux for your AI — invisible when things go right, invaluable when they go wrong. Your agent keeps doing what it does best (context, tools, models). Enso adds the layer it's missing: learning from failure, forgetting what's stale, and protecting its own rules from itself.
 
 ## Works With
 
-| Framework | Status | Install |
-|-----------|--------|---------|
-| Claude Code | Full | `bash install.sh` |
-| Gemini CLI | Full | `bash install.sh --target gemini-cli` |
-| Hermes Agent | Plugin | `bash install.sh --target hermes` |
-| OpenClaw | Hook | `bash install.sh --target openclaw` |
-| Any agent | Generic | `bash install.sh --target generic` |
+| Capability | Claude Code | Gemini CLI | Hermes | OpenClaw | Generic |
+|------------|:-----------:|:----------:|:------:|:--------:|:-------:|
+| Error capture + distillation | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Lesson injection (SessionStart) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Tool call tracing | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Active forgetting + maintenance | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Self-protection (core-readonly) | ✅ | ✅ | — | — | — |
+| Memory safety scan | ✅ | ✅ | — | — | — |
+| Memory budget guard | ✅ | ✅ | — | — | — |
+| Write verification audit | ✅ | ✅ | — | — | — |
+
+Pre-tool-use hooks (self-protection, safety scan, budget guard, write verification) require the framework to support a "before tool execution" lifecycle event. Hermes, OpenClaw, and generic targets get the full learning + forgetting loop but not the guard layer.
 
 ```
 Your Agent (Claude Code / Hermes / OpenClaw / Gemini CLI / ...)
