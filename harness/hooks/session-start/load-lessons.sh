@@ -22,33 +22,51 @@ fi
 # Count sessions
 SESSION_COUNT=$(find "$ENSO_TRACES_DIR" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
 
-# ─── Detect newly learned lessons ───
-# Compare lesson CORE TEXT against announced file (ignores date/hits/seed prefix changes).
-NEW_LESSONS=""
+# ─── Detect newly learned lessons (single Python call) ───
+# One Python process: reads .announced-lessons, finds new lessons,
+# appends new core texts to .announced-lessons, outputs count + stripped text.
+# Output format: first line = count, remaining lines = stripped lesson text.
+NEW_OUTPUT=""
 NEW_COUNT=0
 if [ "$LESSON_COUNT" -gt 0 ]; then
     touch "$ANNOUNCED_FILE"
-    # Extract core text from each lesson, check if announced
-    NEW_LESSONS=$(python3 -c "
+    NEW_OUTPUT=$(python3 -c "
 import re, sys, os
 announced_file = os.environ.get('ENSO_DIR','') + '/.announced-lessons'
+strip_re = re.compile(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?')
+
+# Read announced set
 announced = set()
 if os.path.exists(announced_file):
     with open(announced_file) as f:
         announced = set(line.strip() for line in f if line.strip())
-new_lines = []
+
+# Find new lessons and collect core texts
+new_cores = []
 for line in sys.stdin:
     line = line.strip()
     if not line.startswith('- '):
         continue
-    # Strip prefix: - [date] [hits:N] [seed:XX] → core text
-    core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '', line)
+    core = strip_re.sub('', line)
     if core and core not in announced:
-        new_lines.append(line)
-if new_lines:
-    print('\n'.join(new_lines))
+        new_cores.append(core)
+
+# Output: first line = count, remaining lines = stripped text for display
+print(len(new_cores))
+for core in new_cores:
+    print('- ' + core)
+
+# Append new core texts to announced file
+if new_cores:
+    with open(announced_file, 'a') as f:
+        for core in new_cores:
+            f.write(core + '\n')
 " <<< "$ACTIVE" 2>/dev/null || true)
-    [ -n "$NEW_LESSONS" ] && NEW_COUNT=$(printf '%s\n' "$NEW_LESSONS" | wc -l | tr -d ' ')
+    if [ -n "$NEW_OUTPUT" ]; then
+        NEW_COUNT=$(printf '%s\n' "$NEW_OUTPUT" | head -1)
+        # Validate count is numeric
+        case "$NEW_COUNT" in ''|*[!0-9]*) NEW_COUNT=0 ;; esac
+    fi
 fi
 
 # ─── Output ───
@@ -66,25 +84,9 @@ if [ "$LESSON_COUNT" -gt 0 ]; then
         echo "but as a short, conversational mention (e.g., \"By the way, I learned from last time"
         echo "that...\" or \"上次我学到了...\"). One sentence per lesson is enough."
         echo ""
-        # Show stripped versions (no date/hits prefix)
-        printf '%s\n' "$NEW_LESSONS" | python3 -c "
-import re, sys
-for line in sys.stdin:
-    core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '- ', line.strip())
-    print(core)
-" 2>/dev/null
+        # Display stripped lessons (skip first line which is the count)
+        printf '%s\n' "$NEW_OUTPUT" | tail -n +2
         echo "</enso-newly-learned>"
-
-        # Mark as announced (store core text only)
-        printf '%s\n' "$NEW_LESSONS" | python3 -c "
-import re, sys, os
-announced_file = os.environ.get('ENSO_DIR','') + '/.announced-lessons'
-with open(announced_file, 'a') as f:
-    for line in sys.stdin:
-        core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '', line.strip())
-        if core:
-            f.write(core + '\n')
-" 2>/dev/null || true
     fi
 else
     echo "OK: Enso ready ($SESSION_COUNT sessions, no lessons yet)"
