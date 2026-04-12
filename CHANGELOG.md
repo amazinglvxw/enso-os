@@ -7,6 +7,33 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 - MINOR: New features, new hooks, new mechanisms
 - PATCH: Bug fixes, docs updates, performance improvements
 
+## [0.5.0] — 2026-04-12
+
+### Engineering Credibility Release
+
+Zero new features. Every change fixes a broken promise or adds verification.
+
+### Fixed
+- **Install manifest:** All 7 core files now installed (rebuild-index.py, enso-lint.sh, deleted-lessons-tracker.py were missing)
+- **macOS compatibility:** Portable timeout wrapper (GNU → gtimeout → python3 fallback)
+- **DRY:** Distillation backend refactored from 3 copy-paste blocks to a loop
+- **load-lessons.sh:** Merged 3 Python interpreter calls into 1 (saves ~100ms per session)
+- **distill-lessons.sh:** Pre-load lessons outside dedup loop (O(N) instead of O(N*M) file reads)
+
+### Changed
+- **README:** Honest per-target capability matrix replaces misleading "✅ Full/Plugin/Hook" labels
+- **README:** Separated "enforced" (exit 2 blocks) from "audited" (logged warnings)
+- **enso.toml:** Moved to docs/spec/enso-config-spec.toml (was never read by the system)
+
+### Added
+- **Tests:** pytest suite for parse-hook-input.py (20 tests, 5 formats)
+- **Tests:** BATS tests for adapter.sh (12 tests) and install.sh (19 tests)
+- **CI:** GitHub Actions — shellcheck + pytest + BATS + macOS install smoke test
+
+### Removed
+- **memory/execution-log.jsonl** from git tracking (runtime artifact)
+- **enso.toml** from project root (moved to docs/spec/)
+
 ## [0.4.0] — 2026-04-10
 
 ### Repositioned

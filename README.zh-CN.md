@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/代码量-1401行-brightgreen" alt="1401 LOC"></a>
+  <a href="#"><img src="https://img.shields.io/badge/代码量-1514行-brightgreen" alt="1514 LOC"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hook-10个-orange" alt="10 Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/依赖-bash%20%2B%20python3-blue" alt="bash + python3"></a>
   <a href="#"><img src="https://img.shields.io/badge/框架-5个-blueviolet" alt="5 Frameworks"></a>
