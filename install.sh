@@ -73,7 +73,7 @@ else
     CORE_SRC="$ENSO_DIR/.download_tmp/core"
     mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,post-tool-use-failure,stop,session-start} "$CORE_SRC"
     echo -e "${YELLOW}→${NC} Downloading from GitHub..."
-    for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh; do
+    for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py; do
         curl -fsSL "$GITHUB_BASE/core/$f" -o "$CORE_SRC/$f"
     done
     curl -fsSL "$GITHUB_BASE/hooks/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
@@ -90,7 +90,7 @@ fi
 
 # ─── 3. Copy core + hooks ───
 echo -e "${YELLOW}→${NC} Installing from $SOURCE..."
-for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh; do
+for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py; do
     [ -f "$CORE_SRC/$f" ] && cp "$CORE_SRC/$f" "$ENSO_DIR/core/"
 done
 
@@ -103,7 +103,7 @@ for dir in pre-tool-use post-tool-use post-tool-use-failure stop session-start; 
     fi
 done
 shopt -u nullglob
-chmod +x "$ENSO_DIR/core/env.sh" "$ENSO_DIR/core/adapter.sh" 2>/dev/null || true
+chmod +x "$ENSO_DIR/core/env.sh" "$ENSO_DIR/core/adapter.sh" "$ENSO_DIR/core/enso-lint.sh" 2>/dev/null || true
 
 [ "$SOURCE" = "remote" ] && rm -rf "$ENSO_DIR/.download_tmp"
 
