@@ -7,19 +7,19 @@
 
 ENSO_VALID_TARGETS="claude-code gemini-cli hermes openclaw generic"
 
-# Read target (skip if already exported — avoids re-reading .target on every hook)
+# Read target (skip file read if already set, but ALWAYS validate)
 if [ -z "${ENSO_TARGET:-}" ]; then
     if [ -f "$ENSO_DIR/.target" ]; then
         ENSO_TARGET=$(tr -d '[:space:]' < "$ENSO_DIR/.target")
     fi
     ENSO_TARGET="${ENSO_TARGET:-claude-code}"
-    # Validate — fall back to claude-code on unknown value
-    case " $ENSO_VALID_TARGETS " in
-        *" $ENSO_TARGET "*) ;;
-        *) echo "⚠️  [enso] Unknown target '$ENSO_TARGET', falling back to claude-code" >&2
-           ENSO_TARGET="claude-code" ;;
-    esac
 fi
+# Validate — even if pre-exported (defense against bad parent env)
+case " $ENSO_VALID_TARGETS " in
+    *" $ENSO_TARGET "*) ;;
+    *) echo "⚠️  [enso] Unknown target '$ENSO_TARGET', falling back to claude-code" >&2
+       ENSO_TARGET="claude-code" ;;
+esac
 export ENSO_TARGET
 
 # Output format: lessons/knowledge/wisdom
@@ -29,8 +29,9 @@ enso_adapter_output_lessons() {
         claude-code|gemini-cli)
             printf '<%s count="%s">\n%s\n</%s>\n' "$tag" "$count" "$content" "$tag" ;;
         *)
+            # Portable title case (no GNU sed \u dependency)
             local title
-            title=$(echo "$tag" | sed 's/-/ /g; s/enso //; s/\b\(.\)/\u\1/g')
+            title=$(python3 -c "print('$tag'.replace('-', ' ').replace('enso ', '').title())" 2>/dev/null || echo "$tag")
             printf '## Enso %s (%s active)\n%s\n' "$title" "$count" "$content" ;;
     esac
 }
@@ -41,7 +42,7 @@ enso_adapter_distill() {
     local result=""
     if command -v claude &>/dev/null; then
         result=$(timeout "$timeout_s" bash -c \
-            'printf "%s" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 "$2" 2>/dev/null' \
+            'printf "%s\n\n%s" "$2" "$1" | claude --model claude-haiku-4-5 --print --max-turns 1 2>/dev/null' \
             _ "$context" "$prompt") || true
     elif command -v llm &>/dev/null; then
         result=$(timeout "$timeout_s" bash -c \
