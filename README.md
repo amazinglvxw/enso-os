@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
-  <a href="#"><img src="https://img.shields.io/badge/LOC-1401-brightgreen" alt="1401 Lines of Code"></a>
+  <a href="#"><img src="https://img.shields.io/badge/LOC-1514-brightgreen" alt="1514 Lines of Code"></a>
   <a href="#"><img src="https://img.shields.io/badge/Hooks-10-orange" alt="10 Shell Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/Deps-bash%20%2B%20python3-blue" alt="bash + python3"></a>
   <a href="#"><img src="https://img.shields.io/badge/Frameworks-5-purple" alt="5 Frameworks"></a>

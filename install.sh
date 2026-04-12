@@ -5,7 +5,7 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-ENSO_VERSION="0.4.0"
+ENSO_VERSION="0.5.0"
 ENSO_DIR="$HOME/.enso"
 GITHUB_BASE="https://raw.githubusercontent.com/amazinglvxw/enso-os/main/harness"
 
