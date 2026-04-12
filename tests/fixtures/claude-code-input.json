@@ -1,0 +1,10 @@
+{
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "/tmp/x.py"
+  },
+  "tool_result": {
+    "content": "written"
+  },
+  "duration_ms": 500
+}

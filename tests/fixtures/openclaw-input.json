@@ -1,0 +1,12 @@
+{
+  "action": "write_file",
+  "context": {
+    "workspaceDir": "/tmp",
+    "file": "/tmp/x.py",
+    "result": {
+      "success": false,
+      "output": "permission denied",
+      "durationMs": 200
+    }
+  }
+}
