@@ -1,0 +1,9 @@
+{
+  "tool": {
+    "name": "write"
+  },
+  "arguments": {
+    "path": "/tmp/x.py"
+  },
+  "output": "done"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "execute",
+  "arguments": {
+    "file": "/tmp/script.sh"
+  },
+  "result": "ok"
+}

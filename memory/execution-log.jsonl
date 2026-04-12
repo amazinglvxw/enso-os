@@ -1,7 +1,0 @@
-{"ts":"2026-03-30T11:30:00+08:00","skill":"SESSION","task":"为馨选30店回访拟定4层归因问题清单+分类记录框架","status":"success","detail":"认知/动力/需求/执行四层15问+ABCDE标签体系","q_delta":0}
-{"ts":"2026-03-30T11:35:00+08:00","skill":"SESSION","task":"制作馨选30店回访一页纸记录表(HTML打印版)","status":"success","detail":"4层11问+ABCDE标签+补充记录区,A4单页","q_delta":0}
-{"ts":"2026-03-30T18:30:00+08:00","skill":"SESSION","task":"解答iPhone vs桌面端Claude Code功能差异","status":"success","detail":"纯问答,无代码操作","q_delta":0}
-{"ts":"2026-03-30T18:35:00+08:00","skill":"SESSION","task":"提供iPhone远程使用Claude Code的4种方案","status":"success","detail":"推荐Telegram桥接方案,用户待决定","q_delta":0}
-{"ts":"2026-03-30T18:40:00+08:00","skill":"SESSION","task":"解释Dispatch/RemoteTriggers vs ScheduledTasks区别,测试发现401认证未通","status":"partial","detail":"RemoteTrigger API返回401,建议用户先搞通认证或用Telegram桥接","q_delta":0}
-{"ts":"2026-03-30T18:45:00+08:00","skill":"SESSION","task":"检查Telegram配置状态:已配单向推送,未配双向对话桥接","status":"success","detail":"Bot Token+Chat ID在.zshrc有但当前env未加载,6个定时任务已集成TG推送","q_delta":0}
-{"ts":"2026-03-30T22:42:00+08:00","skill":"simplify","task":"审查并修复claude-to-im配置:plist瘦身+禁用QQ+安全加固+自启动","status":"success","detail":"plist移除重复CTI_*键,ALLOWED_USERS设为用户ID,RunAtLoad=true,ThrottleInterval=30,QQ禁用消除启动报错","q_delta":0}
