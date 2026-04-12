@@ -7,7 +7,7 @@ set -euo pipefail
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 
-LAST_LOAD_TS_FILE="$ENSO_DIR/.last-load-ts"
+ANNOUNCED_FILE="$ENSO_DIR/.announced-lessons"
 
 # Load active lessons (skip stale)
 ACTIVE=""
@@ -22,23 +22,34 @@ fi
 # Count sessions
 SESSION_COUNT=$(find "$ENSO_TRACES_DIR" -name "*.jsonl" 2>/dev/null | wc -l | tr -d ' ')
 
-# ─── Detect newly learned lessons (since last session load) ───
+# ─── Detect newly learned lessons ───
+# Compare lesson CORE TEXT against announced file (ignores date/hits/seed prefix changes).
 NEW_LESSONS=""
 NEW_COUNT=0
-if [ -f "$LAST_LOAD_TS_FILE" ] && [ "$LESSON_COUNT" -gt 0 ]; then
-    LAST_TS=$(cat "$LAST_LOAD_TS_FILE" 2>/dev/null | tr -d '[:space:]')
-    if [ -n "$LAST_TS" ]; then
-        # Lessons with date > last load date are "new"
-        NEW_LESSONS=$(printf '%s\n' "$ACTIVE" | while IFS= read -r line; do
-            LDATE=$(echo "$line" | grep -oP '^\- \[\K\d{4}-\d{2}-\d{2}' 2>/dev/null || echo "$line" | sed -n 's/^- \[\([0-9-]*\)\].*/\1/p')
-            [ -n "$LDATE" ] && [ "$LDATE" \> "$LAST_TS" ] && echo "$line"
-        done || true)
-        [ -n "$NEW_LESSONS" ] && NEW_COUNT=$(printf '%s\n' "$NEW_LESSONS" | wc -l | tr -d ' ')
-    fi
+if [ "$LESSON_COUNT" -gt 0 ]; then
+    touch "$ANNOUNCED_FILE"
+    # Extract core text from each lesson, check if announced
+    NEW_LESSONS=$(python3 -c "
+import re, sys, os
+announced_file = os.environ.get('ENSO_DIR','') + '/.announced-lessons'
+announced = set()
+if os.path.exists(announced_file):
+    with open(announced_file) as f:
+        announced = set(line.strip() for line in f if line.strip())
+new_lines = []
+for line in sys.stdin:
+    line = line.strip()
+    if not line.startswith('- '):
+        continue
+    # Strip prefix: - [date] [hits:N] [seed:XX] → core text
+    core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '', line)
+    if core and core not in announced:
+        new_lines.append(line)
+if new_lines:
+    print('\n'.join(new_lines))
+" <<< "$ACTIVE" 2>/dev/null || true)
+    [ -n "$NEW_LESSONS" ] && NEW_COUNT=$(printf '%s\n' "$NEW_LESSONS" | wc -l | tr -d ' ')
 fi
-
-# Record this load timestamp for next session comparison
-echo "$ENSO_TODAY" > "$LAST_LOAD_TS_FILE"
 
 # ─── Output ───
 if [ "$LESSON_COUNT" -gt 0 ]; then
@@ -48,7 +59,6 @@ if [ "$LESSON_COUNT" -gt 0 ]; then
 
     # If there are newly learned lessons, prompt the agent to tell the user
     if [ "$NEW_COUNT" -gt 0 ]; then
-        STRIPPED=$(printf '%s\n' "$NEW_LESSONS" | sed 's/^- \[[0-9-]*\] \[hits:[0-9]*\] \(\[seed:[a-f0-9]*\] \)\?/- /')
         echo ""
         echo "<enso-newly-learned count=\"$NEW_COUNT\">"
         echo "The following lessons were learned from errors in recent sessions."
@@ -56,8 +66,25 @@ if [ "$LESSON_COUNT" -gt 0 ]; then
         echo "but as a short, conversational mention (e.g., \"By the way, I learned from last time"
         echo "that...\" or \"上次我学到了...\"). One sentence per lesson is enough."
         echo ""
-        echo "$STRIPPED"
+        # Show stripped versions (no date/hits prefix)
+        printf '%s\n' "$NEW_LESSONS" | python3 -c "
+import re, sys
+for line in sys.stdin:
+    core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '- ', line.strip())
+    print(core)
+" 2>/dev/null
         echo "</enso-newly-learned>"
+
+        # Mark as announced (store core text only)
+        printf '%s\n' "$NEW_LESSONS" | python3 -c "
+import re, sys, os
+announced_file = os.environ.get('ENSO_DIR','') + '/.announced-lessons'
+with open(announced_file, 'a') as f:
+    for line in sys.stdin:
+        core = re.sub(r'^- \[\d{4}-\d{2}-\d{2}\]\s*\[hits:\d+\]\s*(?:\[seed:[a-f0-9]+\]\s*)?', '', line.strip())
+        if core:
+            f.write(core + '\n')
+" 2>/dev/null || true
     fi
 else
     echo "OK: Enso ready ($SESSION_COUNT sessions, no lessons yet)"
