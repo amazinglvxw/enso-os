@@ -7,6 +7,24 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 - MINOR: New features, new hooks, new mechanisms
 - PATCH: Bug fixes, docs updates, performance improvements
 
+## [0.6.0] — 2026-04-13
+
+### Audit-Driven Examples Release
+
+Born from a triple-AI health audit (Gemini ×2 + Codex) that scored the system 2.8/10 on value delivery. These examples demonstrate the fixes.
+
+### Added
+- **`examples/` directory** — production-tested hook examples from a real system overhaul
+- **lesson-enforcer.sh** (PreToolUse): Converts passive lessons into deterministic runtime checks. Single python3 call extracts all JSON fields. Checks: directory-as-file-path, large-file-without-offset, git-pull-without-strategy. Demonstrates the core Enso principle: "code enforcement > prompt persuasion"
+- **business-closure-guard.sh** (Stop): Enforces business output per session. Blocks (exit 2) if no execution-log entry or NOW.md update after 2+ minutes. REMINDED_FLAG anti-deadlock pattern prevents infinite blocking loops
+- **health-check-with-breaker.sh** (SessionStart): Infrastructure health check with 1-hour circuit breaker. Prevents noise storms — real case eliminated 1,322 duplicate SYSTEM_OFFLINE log entries. Includes `timeout 3` for docker and polling restart for Qdrant
+- **CI:** GitHub Actions pipeline — shellcheck + pytest + BATS + macOS install smoke test
+
+### Patterns Demonstrated
+- **Circuit breaker**: `/tmp/` lockfiles with TTL to suppress duplicate error logging
+- **Anti-deadlock Stop hooks**: `exit 2` for real enforcement + `REMINDED_FLAG` for deadlock prevention (block once → agent fixes → second attempt passes)
+- **Lesson-to-hook graduation**: When a lesson has 0 hits after 7+ days in the prompt, convert it to a PreToolUse hook that checks at runtime instead
+
 ## [0.5.0] — 2026-04-12
 
 ### Engineering Credibility Release
