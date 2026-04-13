@@ -3,6 +3,7 @@
 # Error seeds → atomic lessons via LLM. Error-signal gated.
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 
@@ -42,7 +43,7 @@ DISTILLED=$(enso_adapter_distill "$CONTEXT" "$DISTILL_TIMEOUT" "$DISTILL_PROMPT"
 # Fallback: skip if no LLM available (raw errors are NOT lessons)
 if [ -z "$DISTILLED" ]; then
     echo "⚠️  [enso] No LLM backend available, skipping distillation" >&2
-    > "$ENSO_ERROR_SEEDS"
+    true > "$ENSO_ERROR_SEEDS"
     exit 0
 fi
 
@@ -164,7 +165,7 @@ if [ -f "${ENSO_DIKW_UTILS:-}" ] && [ -f "${ENSO_SESSION_LOADED_IDS:-/tmp/enso-s
 fi
 
 # Clear processed error seeds
-> "$ENSO_ERROR_SEEDS"
+true > "$ENSO_ERROR_SEEDS"
 
 # Rebuild lessons index for fast LLM routing
 ENSO_LESSONS_FILE="$ENSO_LESSONS_FILE" python3 "$ENSO_CORE/rebuild-index.py" 2>/dev/null || true

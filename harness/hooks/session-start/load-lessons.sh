@@ -4,6 +4,7 @@
 # lessons and prompts the agent to proactively tell the user.
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 

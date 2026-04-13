@@ -3,6 +3,7 @@
 # Cognitive-level forgetting: Lessons LRU + MEMORY.md Archive downsink
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 

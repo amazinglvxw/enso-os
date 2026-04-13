@@ -14,7 +14,8 @@ if [ -z "${_ENSO_INIT_DONE:-}" ]; then
     export ENSO_LESSONS_FILE="$ENSO_LESSONS_DIR/active.md"
     export ENSO_ERROR_SEEDS="$ENSO_DIR/.error_seeds"
     export ENSO_PENDING="$ENSO_DIR/.pending_verifications"
-    export ENSO_TODAY=$(date +%Y-%m-%d)
+    ENSO_TODAY=$(date +%Y-%m-%d)
+    export ENSO_TODAY
     export ENSO_TRACE_FILE="$ENSO_TRACES_DIR/$ENSO_TODAY.jsonl"
     export ENSO_PARSER="$ENSO_CORE/parse-hook-input.py"
 

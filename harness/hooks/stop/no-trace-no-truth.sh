@@ -3,6 +3,7 @@
 # Session-end audit: unverified writes, tool stats, prediction accuracy.
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=""
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 
@@ -14,7 +15,7 @@ if [ -f "$ENSO_PENDING" ] && [ -s "$ENSO_PENDING" ]; then
         head -5 "$ENSO_PENDING" >&2
     fi
 fi
-> "$ENSO_PENDING" 2>/dev/null || true
+true > "$ENSO_PENDING" 2>/dev/null || true
 
 # 2. Session trace summary
 if [ -f "$ENSO_TRACE_FILE" ]; then

@@ -4,6 +4,7 @@
 # NEVER blocks (exit 2) — blocking causes session deadlocks.
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=$(cat)
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 

@@ -3,6 +3,7 @@
 # Agent cannot modify Enso's own hooks or core config.
 set -euo pipefail
 
+# shellcheck disable=SC2034  # ENSO_INPUT consumed by sourced env.sh
 ENSO_INPUT=$(cat)
 source "${ENSO_CORE:-$HOME/.enso/core}/env.sh"
 
