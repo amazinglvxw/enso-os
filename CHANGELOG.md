@@ -12,6 +12,9 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 ### Added
 - **`examples/scripts/execlog-guard.sh`** (Stop hook, v3.1) — execution-log.jsonl two-layer safety net: (1) enforces per-session log write via PostToolUse tracking + mtime fallback with `REMINDED_FLAG` anti-deadlock; (2) **tail JSON integrity check** — parses last 3 lines on every Stop, emits stderr warning if malformed (soft-fail, not blocking). Caught in production: concurrent appends from two sub-2-second Bash writes corrupting a single physical line. Paired with `business-closure-guard.sh` as the log-write enforcement layer.
 
+### Changed
+- **Examples now use `ENSO_MEMORY_DIR` env var** — `examples/hooks/stop/business-closure-guard.sh`, `examples/scripts/execlog-guard.sh`, `examples/scripts/health-check-with-breaker.sh` previously hard-coded the author's local project slug. They now read `${ENSO_MEMORY_DIR:-$HOME/.claude/projects/<YOUR-PROJECT>/memory}` so users can either `export ENSO_MEMORY_DIR=...` or replace the placeholder in-place.
+
 ## [0.6.0] — 2026-04-13
 
 ### Audit-Driven Examples Release

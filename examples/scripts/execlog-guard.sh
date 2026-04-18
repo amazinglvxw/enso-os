@@ -4,7 +4,10 @@
 # 两层防线: PostToolUse(实时提醒) → Stop(最终校验)
 # Exit: 0=放行, 2=阻断(首次)+提醒
 
-EXECLOG="$HOME/.claude/projects/-Users-user-Desktop/memory/execution-log.jsonl"
+# Configure ENSO_MEMORY_DIR via env, or replace the placeholder below with your
+# Claude project slug (see `ls ~/.claude/projects/` for the dir name).
+ENSO_MEMORY_DIR="${ENSO_MEMORY_DIR:-$HOME/.claude/projects/<YOUR-PROJECT>/memory}"
+EXECLOG="$ENSO_MEMORY_DIR/execution-log.jsonl"
 SESSION_START_FILE="/tmp/claude-session-start"
 TRACKING_FILE="/tmp/claude-execlog-tracking"
 REMINDED_FLAG="/tmp/claude-execlog-reminded"

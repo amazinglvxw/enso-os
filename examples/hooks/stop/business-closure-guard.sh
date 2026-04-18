@@ -15,8 +15,12 @@ set -euo pipefail
 
 REMINDED_FLAG="/tmp/claude-biz-closure-reminded"
 SESSION_START_FILE="/tmp/claude-session-start"
-EXECLOG="$HOME/.claude/projects/-Users-user-Desktop/memory/execution-log.jsonl"
-NOW_MD="$HOME/.claude/projects/-Users-user-Desktop/memory/NOW.md"
+
+# Configure ENSO_MEMORY_DIR via env, or replace the placeholder below with your
+# Claude project slug (see `ls ~/.claude/projects/` for the dir name).
+ENSO_MEMORY_DIR="${ENSO_MEMORY_DIR:-$HOME/.claude/projects/<YOUR-PROJECT>/memory}"
+EXECLOG="$ENSO_MEMORY_DIR/execution-log.jsonl"
+NOW_MD="$ENSO_MEMORY_DIR/NOW.md"
 TRACKING_FILE="/tmp/claude-execlog-tracking"
 
 # 防死锁：已提醒过一次就放行

@@ -4,7 +4,10 @@
 # Outputs warnings to stdout (visible to Agent via SessionStart hook)
 # v2 change: SYSTEM_OFFLINE errors are logged at most once per hour (circuit breaker)
 
-EVOLUTION_LOG="${1:-$HOME/.claude/projects/-Users-user-Desktop/memory/evolution-log.md}"
+# Configure ENSO_MEMORY_DIR via env, or replace the placeholder below with your
+# Claude project slug (see `ls ~/.claude/projects/` for the dir name).
+ENSO_MEMORY_DIR="${ENSO_MEMORY_DIR:-$HOME/.claude/projects/<YOUR-PROJECT>/memory}"
+EVOLUTION_LOG="${1:-$ENSO_MEMORY_DIR/evolution-log.md}"
 BREAKER_DIR="/tmp/enso-health-breaker"
 BREAKER_TTL=3600  # 1 hour cooldown per issue type
 ISSUES=()
@@ -96,7 +99,7 @@ date +%s > /tmp/claude-session-start
 rm -f /tmp/claude-execlog-reminded
 
 # 检查 Nightly Review 是否有待审批的 ENFORCED 提案
-PATTERN_COUNTS="$HOME/.claude/projects/-Users-user-Desktop/memory/nightly-reviews/pattern-counts.json"
+PATTERN_COUNTS="$ENSO_MEMORY_DIR/nightly-reviews/pattern-counts.json"
 if [[ -f "$PATTERN_COUNTS" ]]; then
   PENDING=$(python3 -c "
 import json, sys
@@ -110,7 +113,7 @@ except:
 " 2>/dev/null)
   if [[ -n "$PENDING" ]]; then
     echo "⚠️ Nightly Review 有待审批的 ENFORCED 升级提案: $PENDING"
-    echo "查看详情: cat ~/.claude/projects/-Users-user-Desktop/memory/nightly-reviews/$(date +%Y-%m-%d).md"
+    echo "查看详情: cat $ENSO_MEMORY_DIR/nightly-reviews/$(date +%Y-%m-%d).md"
   fi
 fi
 
