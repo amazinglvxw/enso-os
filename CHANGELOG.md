@@ -12,9 +12,6 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 ### Added
 - **`examples/scripts/execlog-guard.sh`** (Stop hook, v3.1) — execution-log.jsonl two-layer safety net: (1) enforces per-session log write via PostToolUse tracking + mtime fallback with `REMINDED_FLAG` anti-deadlock; (2) **tail JSON integrity check** — parses last 3 lines on every Stop, emits stderr warning if malformed (soft-fail, not blocking). Caught in production: concurrent appends from two sub-2-second Bash writes corrupting a single physical line. Paired with `business-closure-guard.sh` as the log-write enforcement layer.
 
-### Fixed
-- **`.github/workflows/ci.yml`** — shellcheck severity `error`→`warning` (avoids blocking PRs on style), pip install uses `python3 -m pip` (consistent with PEP 668 / macOS brew-python).
-
 ## [0.6.0] — 2026-04-13
 
 ### Audit-Driven Examples Release
