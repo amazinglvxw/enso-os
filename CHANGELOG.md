@@ -7,7 +7,21 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 - MINOR: New features, new hooks, new mechanisms
 - PATCH: Bug fixes, docs updates, performance improvements
 
-## [Unreleased]
+## [0.7.0] — 2026-04-21
+
+### The Mirror Release — AI That Speaks First
+
+Every mainstream LLM is **query-response**. You ask, AI answers. Enso v0.7.0 adds the missing half: **observation-initiated dialogue**. The AI now raises the issue *you* haven't asked about — with anti-fatigue rate limits and a sharp distinction between real constraints (don't challenge) and self-limiting patterns (must challenge).
+
+> "PAC is not a judge. It's a mirror."
+
+### Added — PAC (Proactive Accountability Challenge) v0.1
+- **`harness/core/pac-analyzer.py`** — Pattern detection engine that scans `execution-log.jsonl`, `MEMORY.md`, and session transcripts for 5 categories of self-limiting behavior: repetition (starting new without finishing old), claim-action conflict (say X do Y), capability-task mismatch (delegating strategy to executors), sunk cost (investing in zero-growth business), and critical decision nodes. Critically distinguishes **constraint-optimal** choices (don't challenge) from **self-limiting** choices (must challenge). Stdlib-only, no external deps.
+- **`harness/core/pac-question-generator.py`** — Socratic challenge generator enforcing 5 quality rules: (1) based on observation not generic wisdom, (2) points to structure not instance, (3) challenges premise not options, (4) time dimension, (5) no answer given. Uses adapter LLM fallback chain (claude → llm) with template-based fallback for offline operation.
+- **`harness/hooks/stop/pac-challenge-trigger.sh`** — Stop hook that runs analyzer → generator on each session end. Enforces rate limits: max 1 per 24h, 3 per week, 7-day same-pattern silence, 1-month cooldown after 3 rejections. Writes pending challenges to `~/.enso/pac/pending/` for next session injection.
+- **`harness/hooks/session-start/pac-pending-check.sh`** — SessionStart hook that injects the latest unanswered pending PAC challenge into Claude's context as `<enso-pac-pending>` XML block. User is given 3 options: answer now, defer 3 days, or dismiss.
+- **`docs/PAC_SPEC.md`** — Complete product specification: problem statement, 5 detection patterns, quality standards, frequency limits, architecture diagram, effectiveness KPIs, graduation path, philosophy, privacy.
+- **Philosophy**: "PAC is not a judge. It's a mirror." Goal: let the user see themselves clearly. Once a month, PAC should ask a question that makes the user pause silent for 30 seconds. That silence is where growth begins.
 
 ### Added
 - **`examples/scripts/execlog-guard.sh`** (Stop hook, v3.1) — execution-log.jsonl two-layer safety net: (1) enforces per-session log write via PostToolUse tracking + mtime fallback with `REMINDED_FLAG` anti-deadlock; (2) **tail JSON integrity check** — parses last 3 lines on every Stop, emits stderr warning if malformed (soft-fail, not blocking). Caught in production: concurrent appends from two sub-2-second Bash writes corrupting a single physical line. Paired with `business-closure-guard.sh` as the log-write enforcement layer.

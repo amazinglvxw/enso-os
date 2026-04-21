@@ -4,28 +4,34 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
-  <a href="#"><img src="https://img.shields.io/badge/LOC-1514-brightgreen" alt="1514 Lines of Code"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Hooks-10-orange" alt="10 Shell Hooks"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-0.7.0-brightgreen" alt="v0.7.0"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Hooks-12-orange" alt="12 Shell Hooks"></a>
   <a href="#"><img src="https://img.shields.io/badge/Deps-bash%20%2B%20python3-blue" alt="bash + python3"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Frameworks-5-purple" alt="5 Frameworks"></a>
+  <a href="#pac--proactive-accountability-challenge-new-in-v070"><img src="https://img.shields.io/badge/NEW-PAC%20Mechanism-ff69b4" alt="PAC Mechanism"></a>
 </p>
 
 <p align="center">
   <a href="#quickstart">Quickstart</a> &bull;
+  <a href="#pac--proactive-accountability-challenge-new-in-v070"><strong>PAC 🪞</strong></a> &bull;
   <a href="#what-enso-adds">What Enso Adds</a> &bull;
   <a href="#works-with">Works With</a> &bull;
   <a href="#how-it-works">How It Works</a> &bull;
-  <a href="#forgetting">Forgetting</a> &bull;
   <a href="README.zh-CN.md">中文</a>
 </p>
 
 ---
 
-**Enso is not a memory system. It's a discipline system.**
+**Enso is the first AI plugin that speaks first.**
 
-A lightweight plugin that wraps around any AI agent — Claude Code, Hermes, OpenClaw, Gemini CLI — to add code-enforced learning, active forgetting, and self-protection.
+Every LLM product today — ChatGPT, Claude, Gemini, Perplexity — is built on the same anti-pattern: **AI responds, AI never initiates.** It observes your mistakes and stays silent. It sees your self-limiting patterns and waits for you to ask.
 
-Your agent makes the same mistake twice. Enso makes sure there's no third time. Install in 30 seconds. Just bash + python3 (pre-installed on macOS/Linux). Your agent starts learning automatically.
+Enso breaks that silence. It is a discipline plugin that adds three things no mainstream AI product has by default:
+
+1. **Code-enforced learning** — errors become hooks, not prompts. No third strike.
+2. **Active forgetting** — stale knowledge is pruned. Not all memory is worth keeping.
+3. **🪞 PAC (Proactive Accountability Challenge)** — AI that raises the issue *you* haven't asked about.
+
+Install in 30 seconds. Just bash + python3 (pre-installed on macOS/Linux). Wraps around Claude Code, Hermes, OpenClaw, Gemini CLI. Your data stays local.
 
 <p align="center">
   <img src="docs/assets/demo-flow.png" alt="Enso: Session 1 error -> Session 2 learned" width="85%">
@@ -61,6 +67,86 @@ Session 2:  Enso injects the lessons -> Agent avoids the same mistake
             You didn't do anything. The system learned by itself.
 ```
 
+## PAC — Proactive Accountability Challenge (New in v0.7.0)
+
+> *"PAC is not a judge. It's a mirror."*
+
+Every mainstream LLM is **query-response**. You ask, AI answers. If you don't ask about the blindspot, AI doesn't raise it. This is polite. It is also — for serious users — expensive.
+
+PAC adds the missing half: **observation-initiated dialogue.** Enso watches your session logs, memory files, and decision patterns. When it detects self-limiting behavior that you haven't asked about, it writes a Socratic challenge and delivers it at the start of your next session.
+
+### The Five Patterns PAC Detects
+
+| # | Pattern | Example Trigger |
+|---|---------|-----------------|
+| 1 | **Repetition** — Starting new while old is incomplete | 5 new business lines in 30 days, each lasting 4 days |
+| 2 | **Claim-Action Conflict** — Stated focus ≠ executed focus | MEMORY says "focus on X", logs show 70% on Y |
+| 3 | **Capability-Task Mismatch** — Strategy delegated to executors | Supply-chain risk handed to an ops person with past failures |
+| 4 | **Sunk Cost** — Long-running zero-growth with tactical churn | 47 days, 17 days zero growth, pricing changed twice, core assumption never questioned |
+| 5 | **Critical Decision Node** — Irreversible action about to ship | "准备签" / "about to sign" on a ¥500k contract |
+
+### Constraint vs Self-Limitation — The Critical Distinction
+
+A naive challenger burns out the user. PAC's core innovation is classification:
+
+- 🟢 **Constraint-optimal** (DO NOT challenge) — User chose X because of real-world limits they can't change (no runway, family obligations, health). Affirm the choice.
+- 🔴 **Self-limiting** (MUST challenge) — User has the capability and keeps tripping on the same pattern. Challenge firmly.
+
+When uncertain, PAC biases toward **not** challenging. Silence is the safe default.
+
+### Quality Standards
+
+Every PAC challenge must pass five checks before it ever reaches you:
+
+| # | Rule | Bad | Good |
+|---|------|-----|------|
+| 1 | Based on observation, not wisdom | "You should focus more" | "execution-log shows 9 active lines in 30 days" |
+| 2 | Point to structure, not instance | "Why did you do X?" | "Why do you *always* do X-type things?" |
+| 3 | Challenge premise, not options | "A or B?" | "Why do you need this at all?" |
+| 4 | Time dimension | "This is wrong" | "In Q1 you did X, Q2 also X — why?" |
+| 5 | No answer given | "You should do Y" | "If you only had 3 options, what would they be?" |
+
+### Anti-Fatigue by Design
+
+- Max **1 challenge per 24 hours** (hard limit)
+- Max **3 challenges per week** (hard limit)
+- **7-day silence period** after any challenge on the same pattern
+- **1-month cooldown** after 3 consecutive user rejections
+- `PAC_ENABLED=false` to disable entirely
+
+### Example Output
+
+```xml
+<enso-pac-challenge confidence="0.85" pattern="claim_action_conflict">
+  <observation>
+    You told me 3 weeks ago to focus on survival-layer business.
+    execution-log shows 60% of your actual actions on ambition-layer
+    and 25% on remote-layer. Survival-layer: 15%.
+  </observation>
+  <challenges>
+    <q id="1">Is the stated priority still true?</q>
+    <q id="2">If it is, what's the structural force pulling you elsewhere?</q>
+    <q id="3">If it isn't, why hasn't the stated priority been updated?</q>
+  </challenges>
+  <no-answer>These questions are for you to sit with.</no-answer>
+</enso-pac-challenge>
+```
+
+### The Philosophy
+
+> 道德经: **知人者智，自知者明。**
+> Knowing others is intelligence. Knowing yourself is enlightenment.
+>
+> PAC is the mirror for 自知 (self-knowing). Its goal is not to manage you.
+> It is to help you see yourself clearly. Once a month, PAC should ask a question
+> that makes you pause, silent for 30 seconds, unable to immediately answer.
+>
+> That 30 seconds of silence is where growth begins.
+
+Full spec: [docs/PAC_SPEC.md](docs/PAC_SPEC.md)
+
+---
+
 ## What Enso Adds
 
 Enso is a plugin, not a platform. It adds discipline to your existing agent without replacing anything.
@@ -71,6 +157,7 @@ Enso is a plugin, not a platform. It adds discipline to your existing agent with
 | Active forgetting (stale decay, LRU) | Multi-model orchestration |
 | Immutable self-protection (3 hooks) | Platform integrations |
 | Knowledge quality checks (weekly lint) | Tool execution |
+| **🪞 PAC — AI that initiates, not just responds** | Query-response dialogue |
 
 | What Enso enforces (blocks violations) | What Enso audits (logs + warns) |
 |----------------------------------------|---------------------------------|
@@ -109,7 +196,7 @@ Your Agent (Claude Code / Hermes / OpenClaw / Gemini CLI / ...)
   <img src="docs/assets/architecture.png" alt="Enso Architecture" width="85%">
 </p>
 
-**10 hooks, 4 layers.** The agent can't skip what code enforces.
+**12 hooks, 5 layers.** The agent can't skip what code enforces.
 
 | Layer | Hooks | What they do |
 |-------|-------|-------------|
@@ -117,11 +204,13 @@ Your Agent (Claude Code / Hermes / OpenClaw / Gemini CLI / ...)
 | Learning | 3 | Log every tool call. Capture errors. Distill lessons via LLM. |
 | Memory | 1 | Inject lessons + knowledge + wisdom into next session. |
 | Guard | 3 | Memory budget cap. Block secrets/injection. Auto-maintenance. |
+| **🪞 PAC** | 2 | Scan for self-limiting patterns. Inject pending challenges. |
 
-**The core loop:**
+**The two loops:**
 
 ```
-Error -> Capture (code-enforced) -> Distill (async) -> Store -> Inject next session -> Avoid
+Error loop:     Error -> Capture -> Distill -> Store -> Inject -> Avoid (reactive)
+PAC loop:       Pattern -> Classify -> Challenge -> Silence -> Observe answer (proactive)
 ```
 
 ## Forgetting
@@ -159,14 +248,17 @@ Every distillation auto-rebuilds `lessons/INDEX.md` for fast routing.
 │   ├── dikw-utils.py              # DIKW operations (7 subcommands)
 │   ├── enso-lint.sh               # Weekly health check
 │   ├── rebuild-index.py           # Auto-rebuild INDEX.md
-│   └── deleted-lessons-tracker.py # Recovery safety net
-├── hooks/                         # 10 lifecycle hooks
+│   ├── deleted-lessons-tracker.py # Recovery safety net
+│   ├── pac-analyzer.py            # 🪞 5-pattern self-limiting detection
+│   └── pac-question-generator.py  # 🪞 Socratic challenge generation
+├── hooks/                         # 12 lifecycle hooks
 │   ├── pre-tool-use/              # core-readonly, budget-guard, safety-scan
 │   ├── post-tool-use/             # physical-verification, trace-emission
 │   ├── post-tool-use-failure/     # error-seed-capture
-│   ├── stop/                      # audit, distill, maintenance
-│   └── session-start/             # load-lessons
+│   ├── stop/                      # audit, distill, maintenance, pac-challenge
+│   └── session-start/             # load-lessons, pac-pending-check
 ├── dikw/                          # DIKW distillation (Info -> Knowledge -> Wisdom)
+├── pac/                           # 🪞 Pending challenges + history + rate state
 ├── traces/                        # Tool call logs + lint reports
 └── lessons/                       # active.md + INDEX.md
 ```
@@ -226,6 +318,18 @@ No. `bash install.sh` registers all hooks. Next session, it starts learning.
 
 **Q: Why not just use my agent's built-in memory?**
 Built-in memory stores facts. Enso adds what's missing: code-enforced error learning, active forgetting with quality checks, and immutable self-protection hooks that the agent cannot bypass.
+
+**Q: Is PAC just another nagging notification system?**
+No. PAC has five anti-fatigue layers: max 1/day, max 3/week, 7-day same-topic silence, 1-month cooldown after 3 rejections, and a confidence threshold that defaults to 0.70. Most sessions trigger zero PAC challenges. When one does trigger, it's because five independent checks all agreed.
+
+**Q: What if PAC challenges something I already thought through?**
+PAC distinguishes **constraint-optimal** choices (don't challenge) from **self-limiting** ones (must challenge). When uncertain, it stays silent. If it ever misfires, you can dismiss and it enters cooldown on that pattern for 30 days.
+
+**Q: Does PAC send my data anywhere?**
+No. Everything is local in `~/.enso/pac/`. Pattern detection runs in Python on your machine. The Socratic question generator uses your existing LLM adapter chain (claude → llm → openai CLI). No telemetry.
+
+**Q: How do I disable PAC?**
+`export PAC_ENABLED=false` in your shell rc. Or delete the two PAC hooks from `~/.claude/settings.json`. The rest of Enso keeps working.
 
 ## Contributing
 

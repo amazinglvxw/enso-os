@@ -5,7 +5,7 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-ENSO_VERSION="0.5.0"
+ENSO_VERSION="0.7.0"
 ENSO_DIR="$HOME/.enso"
 GITHUB_BASE="https://raw.githubusercontent.com/amazinglvxw/enso-os/main/harness"
 
@@ -73,7 +73,7 @@ else
     CORE_SRC="$ENSO_DIR/.download_tmp/core"
     mkdir -p "$HOOK_SRC"/{pre-tool-use,post-tool-use,post-tool-use-failure,stop,session-start} "$CORE_SRC"
     echo -e "${YELLOW}→${NC} Downloading from GitHub..."
-    for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py; do
+    for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py pac-analyzer.py pac-question-generator.py; do
         curl -fsSL "$GITHUB_BASE/core/$f" -o "$CORE_SRC/$f"
     done
     curl -fsSL "$GITHUB_BASE/hooks/pre-tool-use/core-readonly.sh" -o "$HOOK_SRC/pre-tool-use/core-readonly.sh"
@@ -85,12 +85,14 @@ else
     curl -fsSL "$GITHUB_BASE/hooks/stop/no-trace-no-truth.sh" -o "$HOOK_SRC/stop/no-trace-no-truth.sh"
     curl -fsSL "$GITHUB_BASE/hooks/stop/distill-lessons.sh" -o "$HOOK_SRC/stop/distill-lessons.sh"
     curl -fsSL "$GITHUB_BASE/hooks/stop/session-end-maintenance.sh" -o "$HOOK_SRC/stop/session-end-maintenance.sh"
+    curl -fsSL "$GITHUB_BASE/hooks/stop/pac-challenge-trigger.sh" -o "$HOOK_SRC/stop/pac-challenge-trigger.sh"
     curl -fsSL "$GITHUB_BASE/hooks/session-start/load-lessons.sh" -o "$HOOK_SRC/session-start/load-lessons.sh"
+    curl -fsSL "$GITHUB_BASE/hooks/session-start/pac-pending-check.sh" -o "$HOOK_SRC/session-start/pac-pending-check.sh"
 fi
 
 # ─── 3. Copy core + hooks ───
 echo -e "${YELLOW}→${NC} Installing from $SOURCE..."
-for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py; do
+for f in env.sh parse-hook-input.py dikw-utils.py adapter.sh rebuild-index.py enso-lint.sh deleted-lessons-tracker.py pac-analyzer.py pac-question-generator.py; do
     [ -f "$CORE_SRC/$f" ] && cp "$CORE_SRC/$f" "$ENSO_DIR/core/"
 done
 
@@ -145,9 +147,11 @@ enso_hooks = {
         cmd("stop", "no-trace-no-truth"),
         cmd("stop", "distill-lessons"),
         cmd("stop", "session-end-maintenance"),
+        cmd("stop", "pac-challenge-trigger"),
     ]}],
     "SessionStart": [{"matcher": "", "hooks": [
         cmd("session-start", "load-lessons"),
+        cmd("session-start", "pac-pending-check"),
     ]}],
 }
 for event_type, new_rules in enso_hooks.items():
@@ -286,6 +290,9 @@ esac
 [ -f "$ENSO_DIR/dikw/info-layer.jsonl" ] || touch "$ENSO_DIR/dikw/info-layer.jsonl"
 [ -f "$ENSO_DIR/dikw/knowledge.json" ] || echo '[]' > "$ENSO_DIR/dikw/knowledge.json"
 [ -f "$ENSO_DIR/dikw/wisdom.json" ] || echo '[]' > "$ENSO_DIR/dikw/wisdom.json"
+# PAC state directories (Proactive Accountability Challenge)
+mkdir -p "$ENSO_DIR/pac/pending" "$ENSO_DIR/pac/history"
+[ -f "$ENSO_DIR/pac/history.jsonl" ] || touch "$ENSO_DIR/pac/history.jsonl"
 
 # ─── Done ───
 HOOK_COUNT=$(find "$ENSO_DIR/hooks" -name "*.sh" | wc -l | tr -d ' ')
@@ -298,6 +305,8 @@ echo "   Hooks:      $HOOK_COUNT scripts"
 echo "   DIKW:       ~/.enso/dikw/ (info → knowledge → wisdom)"
 echo "   Traces:     ~/.enso/traces/"
 echo "   Lessons:    ~/.enso/lessons/active.md"
+echo "   PAC:        ~/.enso/pac/ (Proactive Accountability Challenge)"
 echo ""
 echo -e "   ${CYAN}Start a new session to begin.${NC}"
+echo -e "   ${YELLOW}PAC is ON by default. Disable: export PAC_ENABLED=false${NC}"
 echo ""
