@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="1" stop-color="#181818"/>
+    </linearGradient>
+    <linearGradient id="pacGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff6ea0"/>
+      <stop offset="1" stop-color="#ff9f6e"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6a6a6a"/>
+    </marker>
+    <marker id="arrowPac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff7e8a"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="640" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="600" y="52" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700"
+        fill="#ffffff" text-anchor="middle">Two loops. One discipline.</text>
+  <text x="600" y="82" font-family="Inter,Arial,sans-serif" font-size="15"
+        fill="#9a9a9a" text-anchor="middle">Reactive loop learns from errors. Proactive loop surfaces self-limiting patterns.</text>
+
+  <!-- ============ Reactive Loop (top) ============ -->
+  <text x="80" y="145" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="#7a7a7a" letter-spacing="3">REACTIVE · ERROR LOOP</text>
+
+  <g font-family="Inter,Arial,sans-serif" font-size="14" fill="#e8e8e8">
+    <!-- Step boxes -->
+    <g transform="translate(80, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#202020" stroke="#3a3a3a"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle">Session 1</text>
+      <text x="75" y="52" font-size="12" fill="#a0a0a0" text-anchor="middle">Agent hits error</text>
+    </g>
+    <g transform="translate(260, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#202020" stroke="#3a3a3a"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle">🔒 Capture</text>
+      <text x="75" y="52" font-size="12" fill="#a0a0a0" text-anchor="middle">PostToolUseFailure</text>
+    </g>
+    <g transform="translate(440, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#202020" stroke="#3a3a3a"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle">🧠 Distill</text>
+      <text x="75" y="52" font-size="12" fill="#a0a0a0" text-anchor="middle">Haiku → lesson</text>
+    </g>
+    <g transform="translate(620, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#202020" stroke="#3a3a3a"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle">🗄 Store</text>
+      <text x="75" y="52" font-size="12" fill="#a0a0a0" text-anchor="middle">active.md / DIKW</text>
+    </g>
+    <g transform="translate(800, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#202020" stroke="#3a3a3a"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle">💡 Inject</text>
+      <text x="75" y="52" font-size="12" fill="#a0a0a0" text-anchor="middle">Session 2 start</text>
+    </g>
+    <g transform="translate(980, 165)">
+      <rect x="0" y="0" width="150" height="70" rx="8" fill="#1d3522" stroke="#3e6b46"/>
+      <text x="75" y="30" font-weight="700" text-anchor="middle" fill="#c8f0cc">✅ Avoid</text>
+      <text x="75" y="52" font-size="12" fill="#9ccfa2" text-anchor="middle">Agent self-corrects</text>
+    </g>
+  </g>
+
+  <!-- Arrows for reactive loop -->
+  <g stroke="#6a6a6a" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <line x1="230" y1="200" x2="260" y2="200"/>
+    <line x1="410" y1="200" x2="440" y2="200"/>
+    <line x1="590" y1="200" x2="620" y2="200"/>
+    <line x1="770" y1="200" x2="800" y2="200"/>
+    <line x1="950" y1="200" x2="980" y2="200"/>
+  </g>
+
+  <!-- Divider -->
+  <line x1="80" y1="320" x2="1120" y2="320" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- ============ Proactive Loop (bottom) — PAC ============ -->
+  <text x="80" y="370" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700" fill="url(#pacGrad)" letter-spacing="3">🪞 PROACTIVE · PAC LOOP</text>
+  <text x="270" y="370" font-family="Inter,Arial,sans-serif" font-size="12" fill="#8a8a8a">— new in v0.7.0</text>
+
+  <g font-family="Inter,Arial,sans-serif" font-size="14" fill="#e8e8e8">
+    <g transform="translate(80, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#201820" stroke="#4a2f3a"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle">Observe</text>
+      <text x="75" y="50" font-size="11" fill="#b08080" text-anchor="middle">execution-log</text>
+      <text x="75" y="66" font-size="11" fill="#b08080" text-anchor="middle">+ MEMORY.md</text>
+    </g>
+    <g transform="translate(260, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#201820" stroke="#4a2f3a"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle">5-pattern scan</text>
+      <text x="75" y="50" font-size="11" fill="#b08080" text-anchor="middle">repetition / conflict /</text>
+      <text x="75" y="66" font-size="11" fill="#b08080" text-anchor="middle">sunk-cost / decision / ...</text>
+    </g>
+    <g transform="translate(440, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#201820" stroke="#4a2f3a"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle">Classify</text>
+      <text x="75" y="50" font-size="11" fill="#60c468" text-anchor="middle">🟢 constraint → skip</text>
+      <text x="75" y="66" font-size="11" fill="#ff7e8a" text-anchor="middle">🔴 self-limit → challenge</text>
+    </g>
+    <g transform="translate(620, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#201820" stroke="#4a2f3a"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle">Rate-limit</text>
+      <text x="75" y="50" font-size="11" fill="#b08080" text-anchor="middle">1/day · 3/week</text>
+      <text x="75" y="66" font-size="11" fill="#b08080" text-anchor="middle">7-day silence · 1-mo cool</text>
+    </g>
+    <g transform="translate(800, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#201820" stroke="#4a2f3a"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle">Generate</text>
+      <text x="75" y="50" font-size="11" fill="#b08080" text-anchor="middle">Socratic question</text>
+      <text x="75" y="66" font-size="11" fill="#b08080" text-anchor="middle">(5 quality checks)</text>
+    </g>
+    <g transform="translate(980, 395)">
+      <rect x="0" y="0" width="150" height="85" rx="8" fill="#3a2028" stroke="url(#pacGrad)" stroke-width="1.5"/>
+      <text x="75" y="28" font-weight="700" text-anchor="middle" fill="#ffc8d0">🪞 Inject next session</text>
+      <text x="75" y="50" font-size="11" fill="#ffb0bc" text-anchor="middle">User pauses.</text>
+      <text x="75" y="66" font-size="11" fill="#ffb0bc" text-anchor="middle">30 seconds of silence.</text>
+    </g>
+  </g>
+
+  <g stroke="#ff7e8a" stroke-width="2" fill="none" marker-end="url(#arrowPac)">
+    <line x1="230" y1="438" x2="260" y2="438"/>
+    <line x1="410" y1="438" x2="440" y2="438"/>
+    <line x1="590" y1="438" x2="620" y2="438"/>
+    <line x1="770" y1="438" x2="800" y2="438"/>
+    <line x1="950" y1="438" x2="980" y2="438"/>
+  </g>
+
+  <!-- Example PAC output -->
+  <g transform="translate(80, 515)">
+    <rect x="0" y="0" width="1040" height="98" rx="10" fill="#14141a" stroke="#3a2a38"/>
+    <text x="20" y="26" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#ff9f6e" font-weight="700">🪞 &lt;enso-pac-challenge confidence="0.85" pattern="claim_action_conflict"&gt;</text>
+    <text x="20" y="48" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#d0d0d0">  3 weeks ago you said: focus on survival-layer. execution-log: 60% ambition-layer, 25% remote-layer, 15% survival-layer.</text>
+    <text x="20" y="68" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#b0b0b0">  Q1: Is the stated priority still true?  Q2: What structural force pulls you elsewhere?  Q3: Why hasn't the stated priority updated?</text>
+    <text x="20" y="86" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#808080">  &lt;no-answer&gt;These questions are for you to sit with.&lt;/no-answer&gt;</text>
+  </g>
+</svg>

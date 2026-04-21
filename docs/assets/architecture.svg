@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="1" stop-color="#181818"/>
+    </linearGradient>
+    <linearGradient id="pacGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff6ea0"/>
+      <stop offset="1" stop-color="#ff9f6e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="720" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="600" y="50" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700"
+        fill="#ffffff" text-anchor="middle">Enso Architecture — 12 hooks, 5 layers</text>
+  <text x="600" y="78" font-family="Inter,Arial,sans-serif" font-size="14"
+        fill="#9a9a9a" text-anchor="middle">Code enforces what the agent cannot skip.</text>
+
+  <!-- Agent box on top -->
+  <g transform="translate(350, 105)">
+    <rect x="0" y="0" width="500" height="48" rx="8" fill="#1c2836" stroke="#3a5671"/>
+    <text x="250" y="31" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="700"
+          fill="#a8d0ff" text-anchor="middle">Your Agent — Claude Code · Gemini CLI · Hermes · OpenClaw · Generic</text>
+  </g>
+
+  <!-- Arrow down -->
+  <g stroke="#5a5a5a" stroke-width="2" fill="none">
+    <line x1="600" y1="153" x2="600" y2="178"/>
+    <polygon points="594,175 606,175 600,185" fill="#5a5a5a"/>
+  </g>
+  <text x="625" y="172" font-family="Inter,Arial,sans-serif" font-size="12" fill="#8a8a8a">every tool call passes through</text>
+
+  <!-- 5 layer stack -->
+  <g font-family="Inter,Arial,sans-serif">
+    <!-- Layer 1: Immutable -->
+    <g transform="translate(100, 195)">
+      <rect x="0" y="0" width="1000" height="68" rx="10" fill="#1a1a1a" stroke="#3a3a3a"/>
+      <text x="30" y="28" font-size="16" font-weight="700" fill="#ffffff">🔒 Immutable</text>
+      <text x="30" y="50" font-size="12" fill="#a0a0a0">core-readonly · physical-verification · no-trace-no-truth</text>
+      <text x="900" y="42" font-size="38" font-weight="800" fill="#3a3a3a" text-anchor="end">3</text>
+      <text x="940" y="42" font-size="12" fill="#7a7a7a">hooks</text>
+    </g>
+
+    <!-- Layer 2: Learning -->
+    <g transform="translate(100, 275)">
+      <rect x="0" y="0" width="1000" height="68" rx="10" fill="#1a1a1a" stroke="#3a3a3a"/>
+      <text x="30" y="28" font-size="16" font-weight="700" fill="#ffffff">🧠 Learning</text>
+      <text x="30" y="50" font-size="12" fill="#a0a0a0">trace-emission · error-seed-capture · distill-lessons</text>
+      <text x="900" y="42" font-size="38" font-weight="800" fill="#3a3a3a" text-anchor="end">3</text>
+      <text x="940" y="42" font-size="12" fill="#7a7a7a">hooks</text>
+    </g>
+
+    <!-- Layer 3: Memory -->
+    <g transform="translate(100, 355)">
+      <rect x="0" y="0" width="1000" height="68" rx="10" fill="#1a1a1a" stroke="#3a3a3a"/>
+      <text x="30" y="28" font-size="16" font-weight="700" fill="#ffffff">💡 Memory</text>
+      <text x="30" y="50" font-size="12" fill="#a0a0a0">load-lessons (inject lessons + knowledge + wisdom into next session)</text>
+      <text x="900" y="42" font-size="38" font-weight="800" fill="#3a3a3a" text-anchor="end">1</text>
+      <text x="940" y="42" font-size="12" fill="#7a7a7a">hook</text>
+    </g>
+
+    <!-- Layer 4: Guard -->
+    <g transform="translate(100, 435)">
+      <rect x="0" y="0" width="1000" height="68" rx="10" fill="#1a1a1a" stroke="#3a3a3a"/>
+      <text x="30" y="28" font-size="16" font-weight="700" fill="#ffffff">🛡️ Guard</text>
+      <text x="30" y="50" font-size="12" fill="#a0a0a0">memory-budget-guard · memory-safety-scan · session-end-maintenance</text>
+      <text x="900" y="42" font-size="38" font-weight="800" fill="#3a3a3a" text-anchor="end">3</text>
+      <text x="940" y="42" font-size="12" fill="#7a7a7a">hooks</text>
+    </g>
+
+    <!-- Layer 5: PAC -->
+    <g transform="translate(100, 515)">
+      <rect x="0" y="0" width="1000" height="68" rx="10"
+            fill="#2a1822" stroke="url(#pacGrad)" stroke-width="1.5"/>
+      <text x="30" y="28" font-size="16" font-weight="700" fill="#ffffff">🪞 PAC — Proactive Accountability <tspan fill="url(#pacGrad)">NEW v0.7.0</tspan></text>
+      <text x="30" y="50" font-size="12" fill="#d0a8b0">pac-challenge-trigger · pac-pending-check (5-pattern detection, Socratic challenges)</text>
+      <text x="900" y="42" font-size="38" font-weight="800" fill="#5a2f3a" text-anchor="end">2</text>
+      <text x="940" y="42" font-size="12" fill="#a07080">hooks</text>
+    </g>
+  </g>
+
+  <!-- Storage layer at bottom -->
+  <g transform="translate(100, 620)">
+    <text x="0" y="0" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="700"
+          fill="#7a7a7a" letter-spacing="2">STORAGE (100% local · no telemetry)</text>
+    <g transform="translate(0, 20)">
+      <rect x="0" y="0" width="220" height="56" rx="8" fill="#141414" stroke="#2a2a2a"/>
+      <text x="14" y="22" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e0e0e0">~/.enso/lessons/</text>
+      <text x="14" y="40" font-family="Inter,Arial,sans-serif" font-size="11" fill="#808080">active.md · INDEX.md</text>
+    </g>
+    <g transform="translate(240, 20)">
+      <rect x="0" y="0" width="220" height="56" rx="8" fill="#141414" stroke="#2a2a2a"/>
+      <text x="14" y="22" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e0e0e0">~/.enso/dikw/</text>
+      <text x="14" y="40" font-family="Inter,Arial,sans-serif" font-size="11" fill="#808080">info → knowledge → wisdom</text>
+    </g>
+    <g transform="translate(480, 20)">
+      <rect x="0" y="0" width="220" height="56" rx="8" fill="#141414" stroke="#2a2a2a"/>
+      <text x="14" y="22" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e0e0e0">~/.enso/traces/</text>
+      <text x="14" y="40" font-family="Inter,Arial,sans-serif" font-size="11" fill="#808080">trace-YYYY-MM-DD.jsonl</text>
+    </g>
+    <g transform="translate(720, 20)">
+      <rect x="0" y="0" width="280" height="56" rx="8" fill="#1e1418" stroke="url(#pacGrad)" stroke-opacity="0.6"/>
+      <text x="14" y="22" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#ffc0c8">🪞 ~/.enso/pac/</text>
+      <text x="14" y="40" font-family="Inter,Arial,sans-serif" font-size="11" fill="#b08090">pending · history · rate-state</text>
+    </g>
+  </g>
+</svg>

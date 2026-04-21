@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0a0a"/>
+      <stop offset="1" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="pacAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff6ea0"/>
+      <stop offset="1" stop-color="#ff9f6e"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+
+  <!-- Enso circle, drawn in one stroke, now with a reflection (the mirror) -->
+  <g transform="translate(170, 210)">
+    <circle cx="0" cy="0" r="78" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"
+            stroke-dasharray="420 60" transform="rotate(-30)"/>
+    <!-- subtle mirror reflection arc -->
+    <circle cx="0" cy="0" r="78" fill="none" stroke="url(#pacAccent)" stroke-width="2"
+            stroke-dasharray="140 350" transform="rotate(70)" opacity="0.85"/>
+  </g>
+
+  <!-- Title -->
+  <text x="300" y="140" font-family="'Inter','SF Pro Text','Helvetica Neue',Arial,sans-serif"
+        font-size="64" font-weight="800" fill="#ffffff" letter-spacing="-1">Enso</text>
+
+  <text x="300" y="195" font-family="'Inter','SF Pro Text',Arial,sans-serif"
+        font-size="30" font-weight="500" fill="#d4d4d4" letter-spacing="-0.5">
+    The first AI plugin that <tspan fill="url(#pacAccent)" font-weight="700">speaks first</tspan>.
+  </text>
+
+  <text x="300" y="240" font-family="'Inter',Arial,sans-serif"
+        font-size="18" font-weight="400" fill="#9a9a9a">
+    Query-response is the ceiling of ChatGPT, Claude, Gemini. Enso breaks it.
+  </text>
+
+  <!-- Three pillars -->
+  <g transform="translate(300, 282)">
+    <!-- Pillar 1: Learning -->
+    <g>
+      <rect x="0" y="0" width="270" height="98" rx="10" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.15"/>
+      <text x="18" y="32" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#ffffff">🔒 Code-enforced learning</text>
+      <text x="18" y="58" font-family="Inter,Arial,sans-serif" font-size="13" fill="#a8a8a8">Errors become hooks,</text>
+      <text x="18" y="78" font-family="Inter,Arial,sans-serif" font-size="13" fill="#a8a8a8">not prompts. No third strike.</text>
+    </g>
+    <!-- Pillar 2: Forgetting -->
+    <g transform="translate(290, 0)">
+      <rect x="0" y="0" width="270" height="98" rx="10" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.15"/>
+      <text x="18" y="32" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#ffffff">🧹 Active forgetting</text>
+      <text x="18" y="58" font-family="Inter,Arial,sans-serif" font-size="13" fill="#a8a8a8">Stale pruned. LRU evicted.</text>
+      <text x="18" y="78" font-family="Inter,Arial,sans-serif" font-size="13" fill="#a8a8a8">Not all memory is worth keeping.</text>
+    </g>
+    <!-- Pillar 3: PAC (highlighted) -->
+    <g transform="translate(580, 0)">
+      <rect x="0" y="0" width="300" height="98" rx="10"
+            fill="url(#pacAccent)" fill-opacity="0.12"
+            stroke="url(#pacAccent)" stroke-width="1.5" stroke-opacity="0.7"/>
+      <text x="18" y="32" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="700" fill="#ffffff">🪞 PAC — <tspan fill="url(#pacAccent)">Proactive Challenge</tspan></text>
+      <text x="18" y="58" font-family="Inter,Arial,sans-serif" font-size="13" fill="#cfcfcf">AI raises the issue you</text>
+      <text x="18" y="78" font-family="Inter,Arial,sans-serif" font-size="13" fill="#cfcfcf">haven't asked about. NEW in v0.7.0</text>
+    </g>
+  </g>
+
+  <!-- Version pill bottom right -->
+  <g transform="translate(1060, 378)">
+    <rect x="-50" y="-14" width="100" height="22" rx="11" fill="#ffffff" fill-opacity="0.08"/>
+    <text x="0" y="2" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="600" fill="#cfcfcf" text-anchor="middle">v0.7.0 🪞</text>
+  </g>
+</svg>

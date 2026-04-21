@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/hero-banner.png" alt="Enso" width="100%">
+  <img src="docs/assets/hero-banner.svg" alt="Enso" width="100%">
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@ Enso breaks that silence. It is a discipline plugin that adds three things no ma
 Install in 30 seconds. Just bash + python3 (pre-installed on macOS/Linux). Wraps around Claude Code, Hermes, OpenClaw, Gemini CLI. Your data stays local.
 
 <p align="center">
-  <img src="docs/assets/demo-flow.png" alt="Enso: Session 1 error -> Session 2 learned" width="85%">
+  <img src="docs/assets/demo-flow.svg" alt="Enso: Session 1 error -> Session 2 learned" width="85%">
 </p>
 
 ## Quickstart
@@ -193,7 +193,7 @@ Your Agent (Claude Code / Hermes / OpenClaw / Gemini CLI / ...)
 ## How It Works
 
 <p align="center">
-  <img src="docs/assets/architecture.png" alt="Enso Architecture" width="85%">
+  <img src="docs/assets/architecture.svg" alt="Enso Architecture" width="85%">
 </p>
 
 **12 hooks, 5 layers.** The agent can't skip what code enforces.
