@@ -83,7 +83,7 @@ PAC adds the missing half: **observation-initiated dialogue.** Enso watches your
 | 2 | **Claim-Action Conflict** — Stated focus ≠ executed focus | MEMORY says "focus on X", logs show 70% on Y |
 | 3 | **Capability-Task Mismatch** — Strategy delegated to executors | Supply-chain risk handed to an ops person with past failures |
 | 4 | **Sunk Cost** — Long-running zero-growth with tactical churn | 47 days, 17 days zero growth, pricing changed twice, core assumption never questioned |
-| 5 | **Critical Decision Node** — Irreversible action about to ship | "准备签" / "about to sign" on a ¥500k contract |
+| 5 | **Critical Decision Node** — Irreversible action about to ship | "about to sign" on a $50k contract |
 
 ### Constraint vs Self-Limitation — The Critical Distinction
 
@@ -119,9 +119,9 @@ Every PAC challenge must pass five checks before it ever reaches you:
 ```xml
 <enso-pac-challenge confidence="0.85" pattern="claim_action_conflict">
   <observation>
-    You told me 3 weeks ago to focus on survival-layer business.
-    execution-log shows 60% of your actual actions on ambition-layer
-    and 25% on remote-layer. Survival-layer: 15%.
+    You told me 3 weeks ago to focus on the survival layer.
+    execution-log shows 60% of your actual actions on the ambition layer
+    and 25% on the remote layer. Survival layer: 15%.
   </observation>
   <challenges>
     <q id="1">Is the stated priority still true?</q>

@@ -1,0 +1,49 @@
+{
+  "case_insensitive": true,
+
+  "start_keywords": [
+    "start new", "new line", "new project", "new product",
+    "launch", "kickoff", "spinning up"
+  ],
+
+  "delegate_regexes": [
+    "(?:delegating|handing|giving) (?:to|over) (\\w+)",
+    "(\\w+) (?:will handle|is handling|takes over)"
+  ],
+
+  "strategic_keywords": [
+    "strategy", "risk", "negotiation", "contract",
+    "direction", "decision", "roadmap", "planning"
+  ],
+
+  "zero_growth_regexes": [
+    "([A-Za-z0-9_]{1,20})\\s*:?\\s*(\\d+)\\s*days?\\s*(?:of\\s*)?zero\\s*growth"
+  ],
+
+  "decision_patterns": [
+    { "regex": "about to sign",                        "type": "contract_signing"  },
+    { "regex": "committing \\$?(\\d+)[kKmM]?",         "type": "investment_commit" },
+    { "regex": "(?:shutting down|closing) (\\S+)",     "type": "business_closure"  },
+    { "regex": "(?:fundrais|raise) (?:round|capital)", "type": "fundraising"       }
+  ],
+
+  "claim_focus_marker": "survival layer",
+
+  "business_lines": {
+    "ProjectA": ["project-a", "alpha"],
+    "ProjectB": ["project-b", "beta"],
+    "ProjectC": ["project-c", "gamma"]
+  },
+
+  "survival_lines": ["ProjectA"],
+
+  "executor_roles": [],
+
+  "constraint_signals": [
+    "stable cashflow chosen",
+    "no runway for risk",
+    "staying lean",
+    "family obligations",
+    "compliance first"
+  ]
+}

@@ -86,7 +86,7 @@ PAC is a system-level mechanism in Enso that:
 **Data Source:** MEMORY.md declarations + execution-log actual actions
 
 **Example:**
-> Observation: You told me 3 weeks ago to focus on survival-layer business. Actual execution-log shows 60% of actions on ambition-layer (ProjectX) and remote-layer (Enso).
+> Observation: You told me 3 weeks ago to focus on the survival layer. Actual execution-log shows 60% of actions on the ambition layer (ProjectX) and remote layer (the meta-tool).
 
 ---
 
@@ -102,7 +102,7 @@ PAC is a system-level mechanism in Enso that:
 **Data Source:** MEMORY.md team info + conversation content + past failure records
 
 **Example:**
-> Observation: You just delegated supply chain risk management to TeamMemberA. Based on past records (biography notes he's not strong at strategic/risk thinking), this same pattern caused the ProjectY crisis last week.
+> Observation: You just delegated supply-chain risk management to Alice (configured as an executor-layer role in biography). This same pattern caused the ProjectY crisis last week.
 
 ---
 
@@ -128,13 +128,13 @@ PAC is a system-level mechanism in Enso that:
 
 **Signals:**
 - Keywords: "准备签", "打算投", "决定做", "放弃", "关闭", "融资"
-- Amount > threshold (e.g., ≥ ¥50,000 investment or ≥ ¥100,000 commitment)
+- Amount > threshold (e.g., ≥ $10k investment or ≥ $50k commitment)
 - Irreversibility indicators: stock transfer, contract signing, key hires
 
 **Data Source:** Real-time conversation scanning
 
 **Example:**
-> Observation: You mentioned "准备签新合同" which commits ¥500k+. Before signing, let me ask 3 questions you may not have asked yourself.
+> Observation: You mentioned "about to sign" on a contract committing $50k+. Before signing, let me ask 3 questions you may not have asked yourself.
 
 ---
 
@@ -159,7 +159,7 @@ User chose X because of real-world constraints they cannot change:
 User chose X because of internal patterns they CAN change:
 - Has the capability but doesn't use it (VP brain doing supply chain grunt work)
 - States priority A but executes on B (claims focus, runs 10 lines)
-- Uses busy-ness to avoid real problems (avoids ProjectX strategic review)
+- Uses busy-ness to avoid real problems (avoids a strategic review that's overdue)
 - Delegates important things to unqualified people (strategy to executor)
 - Repeatedly trips on same pattern (multiple cycles of scatter-focus)
 

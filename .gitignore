@@ -12,18 +12,15 @@ __pycache__/
 *.personal.md
 *.private.md
 memory/data/
+memory/execution-log.jsonl
 .env
+
+# PAC user config (lexicon is personal — use pac-config.example.json as template)
+harness/core/pac-config.json
+**/pac-config.local.json
+.enso/pac/config.json
 
 # IDE
 .idea/
 .vscode/
 *.code-workspace
-
-# Runtime artifacts
-memory/execution-log.jsonl
-memory/*.jsonl
-*.lock
-.last-load-ts
-.announced-lessons
-.error_seeds
-.pending_verifications

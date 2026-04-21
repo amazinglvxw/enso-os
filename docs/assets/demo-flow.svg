@@ -128,7 +128,7 @@
   <g transform="translate(80, 515)">
     <rect x="0" y="0" width="1040" height="98" rx="10" fill="#14141a" stroke="#3a2a38"/>
     <text x="20" y="26" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#ff9f6e" font-weight="700">🪞 &lt;enso-pac-challenge confidence="0.85" pattern="claim_action_conflict"&gt;</text>
-    <text x="20" y="48" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#d0d0d0">  3 weeks ago you said: focus on survival-layer. execution-log: 60% ambition-layer, 25% remote-layer, 15% survival-layer.</text>
+    <text x="20" y="48" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#d0d0d0">  3 weeks ago you said: focus on the survival layer. execution-log: 60% ambition layer, 25% remote layer, 15% survival.</text>
     <text x="20" y="68" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#b0b0b0">  Q1: Is the stated priority still true?  Q2: What structural force pulls you elsewhere?  Q3: Why hasn't the stated priority updated?</text>
     <text x="20" y="86" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#808080">  &lt;no-answer&gt;These questions are for you to sit with.&lt;/no-answer&gt;</text>
   </g>
