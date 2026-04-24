@@ -7,6 +7,42 @@ Format: [Semantic Versioning](https://semver.org/) — MAJOR.MINOR.PATCH
 - MINOR: New features, new hooks, new mechanisms
 - PATCH: Bug fixes, docs updates, performance improvements
 
+## [0.7.1] — 2026-04-24
+
+### Fixed — PAC Silent-Killer Bug
+
+Critical bug: every PAC challenge was being silently classified as
+`constraint_optimal` and filtered out, because `classify_signal()` scanned
+the entire MEMORY.md for constraint keywords without locality. If the user's
+profile mentioned any constraint term anywhere (e.g. "economic downturn" in
+their biography), **every unrelated signal got silenced**.
+
+This was discovered during systematic debugging when a user reported PAC had
+never raised a single challenge in two days of use. The detection pipeline
+itself worked perfectly — all 5 patterns fired at 0.75–0.95 confidence — but
+100% of them hit the false-positive constraint filter.
+
+### Changed
+- **`harness/core/pac-analyzer.py::classify_signal`** — constraint signals
+  now require **locality**: either
+  (a) the keyword appears inside the current signal's evidence, or
+  (b) the keyword appears within 120 chars of the signal's subject
+      (business-line / person name) in MEMORY.md
+  Before: any constraint term anywhere in MEMORY.md silenced every challenge.
+  After: constraint must apply to *this decision*, not the user's life backdrop.
+
+### Upgrade
+```bash
+cd enso-os && git pull && bash install.sh
+```
+
+No config changes required. Existing `~/.enso/pac/config.json` keeps working,
+but users are encouraged to narrow `constraint_signals` to decision-scoped
+phrases ("此决策受限", "因资金约束选择") rather than lifestyle descriptors
+("经济下行", "现金底薄").
+
+---
+
 ## [0.7.0] — 2026-04-21
 
 ### The Mirror Release — AI That Speaks First

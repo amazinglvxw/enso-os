@@ -469,10 +469,50 @@ DETECTORS: list = [
 # ============================================================================
 
 def classify_signal(signal: Signal, memory: str, config: PacConfig) -> Classification:
-    evidence_str = str(signal.evidence)
+    """Classify as self_limiting (challenge) or constraint_optimal (skip).
+
+    FIX v0.7.1: constraint signals must appear WITHIN the current signal's
+    evidence context, not anywhere in MEMORY.md. Previous logic caused
+    every challenge to be silenced whenever the user's profile happened
+    to mention any constraint keyword (e.g. '经济下行' in user bio would
+    silence a totally unrelated sunk-cost signal).
+
+    Memory is still consulted, but only if the keyword appears near the
+    signal's business/person subject (proximity check).
+    """
+    evidence_str = str(signal.evidence).lower()
+    evidence_lower = evidence_str
+
+    # Primary signal: constraint keyword is cited IN this signal's evidence.
     for kw in config.constraint_signals:
-        if kw.lower() in evidence_str.lower() or kw.lower() in memory.lower():
+        if kw.lower() in evidence_lower:
             return Classification.CONSTRAINT_OPTIMAL
+
+    # Secondary: constraint keyword appears near the signal's subject in memory.
+    # Subject = business line name / person name pulled out of evidence.
+    subject = ""
+    for field in ("line", "business", "person"):
+        v = signal.evidence.get(field) if isinstance(signal.evidence, dict) else None
+        if v:
+            subject = str(v).lower()
+            break
+
+    if subject and memory:
+        memory_lower = memory.lower()
+        for kw in config.constraint_signals:
+            kw_lower = kw.lower()
+            # Scan every occurrence of the constraint keyword and check if the
+            # signal's subject appears within 120 chars of it.
+            start = 0
+            while True:
+                idx = memory_lower.find(kw_lower, start)
+                if idx == -1:
+                    break
+                window = memory_lower[max(0, idx - 120): idx + 120 + len(kw_lower)]
+                if subject in window:
+                    return Classification.CONSTRAINT_OPTIMAL
+                start = idx + 1
+
     if signal.pattern in SELF_LIMITING_PATTERNS:
         return Classification.SELF_LIMITING
     return Classification.SELF_LIMITING
